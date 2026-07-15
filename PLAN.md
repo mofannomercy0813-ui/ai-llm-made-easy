@@ -1,8 +1,49 @@
-# 《AI 大模型不难》项目计划书
+# 《AI 大模型不难》项目计划书（最终版）
 
-> 一本让零基础读者也能笑着看懂 Transformer 的开源电子书。
-> 灵感来自鸢尾花书"数学不难"系列，风格融入数字生命卡兹克的「活人感」写作。
-> ——2026 年 7 月 15 日启动
+> 周末读完的 LLM 面试通关书。28 课 + 2 附录，每课一个生活比喻 + 一个手算示例。
+> 启动于 2026 年 7 月 15 日，同日完成 V1-V5 迭代。
+
+## 定位
+
+不讲代码，只讲你能在面试里说清楚的原理。竞品差异化：
+- vs 图解大模型（Jay Alammar）：我们用比喻体系 + 手算示例，不是 300 幅图
+- vs Happy-LLM（Datawhale）：我们不写代码，纯概念讲解
+- vs 面试题库：我们给原理和机制，不只是 Q&A
+
+## 最终结构（30 个文件）
+
+```
+Part 0  开篇（1 课）
+Part 1  世界观（6 课）：Token→涌现→Prompt→解码策略→RLHF→量化蒸馏分布式
+Part 2  引擎（8 课）：Transformer→Attention→多头→位置编码→残差→LayerNorm→Pre/Post-norm→Mask
+Part 3  炼金（6 课）：参数vs数据→MLM/CLM→RLHF→DPO/GRPO→LoRA→训练硬核
+Part 4  落地（6 课）：RAG→推理优化→Agent→MCP/A2A→前沿架构→多模态
+Part 5  实战（2 课）：大厂真题上/下 + 系统设计 + 项目讲述
+附录 A  NLP 基础速查
+附录 B  理论速查表（显存/公式/默认值/模型对比）
+```
+
+## 技术栈
+
+- Markdown 写作
+- Python 构建脚本（build_html.py）：MD → 单页 HTML + LaTeX → Unicode 转换
+- Chrome headless：HTML → PDF
+- GitHub Actions：DeepSeek Code Review（PR 触发）
+- 5 张手绘 SVG 图解（assets/）
+
+## 质检标准
+
+每课 L1 硬性检查（禁用词/禁用标点/结构套话），零违规。全文累计 L1 零命中。
+
+## 版本演进
+
+| 版本 | 内容 |
+|------|------|
+| V1 | 故事化叙事，~1300 字/课 |
+| V2 | 压掉废话，~650 字/课 |
+| V3 | 追问模块替换为 step-by-step 示例 |
+| V4 | 逐章补机制深度，确保每课讲清楚原理 |
+| V5 | 竞品对齐：解码策略/VLM/附录/PDF/README 定位
 
 ---
 

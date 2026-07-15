@@ -1,6 +1,23 @@
 # 仓库配置指南
 
-## 1. 启用 DeepSeek Code Review
+## 1. 本地构建
+
+```bash
+# 安装依赖
+pip install markdown
+
+# 生成 HTML（单页电子书）
+python scripts/build_html.py
+
+# 生成 HTML + PDF（需要 Chrome 或 Edge）
+python scripts/build_html.py --pdf
+
+# 输出
+# index.html — 单页 HTML 电子书
+# ai-llm-made-easy.pdf — PDF 版本
+```
+
+## 2. 启用 DeepSeek Code Review
 
 ### 步骤 1：获取 DeepSeek API Key
 
