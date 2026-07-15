@@ -30,6 +30,7 @@ PART_DIRS = [
     ("part3-training",  "第三部分：炼金 —— 模型是怎么训出来的"),
     ("part4-engineering","第四部分：落地 —— 大模型的十八般武艺"),
     ("part5-interview", "第五部分：实战 —— 面试现场还原"),
+    ("appendix",        "附录"),
 ]
 
 
