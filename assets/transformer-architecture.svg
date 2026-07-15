@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 440">
+  <title>Transformer Architecture: Encoder vs Decoder</title>
+  <desc>Side-by-side comparison of the Transformer Encoder stack (blue) and Decoder stack (purple), connected via Cross-Attention.</desc>
+
+  <!-- Background -->
+  <rect width="680" height="440" fill="#FAFAFA" rx="6"/>
+
+  <style>
+    text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  </style>
+
+  <!-- Section Title -->
+  <text x="340" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#2C2C2C">Transformer Architecture</text>
+
+  <!-- ============ ENCODER SIDE (Left) ============ -->
+
+  <!-- Encoder Label -->
+  <text x="175" y="54" text-anchor="middle" font-size="13" font-weight="700" fill="#378ADD">Encoder</text>
+  <text x="175" y="54" text-anchor="middle" font-size="13" font-weight="700" fill="#FFF" visibility="hidden"/>
+
+  <!-- Input Box -->
+  <rect x="80" y="64" width="190" height="28" rx="4" fill="#378ADD" opacity="0.12"/>
+  <text x="175" y="82" text-anchor="middle" font-size="12" fill="#2C2C2C">Input Sequence</text>
+
+  <!-- Arrow Input → Embedding -->
+  <line x1="175" y1="92" x2="175" y2="104" stroke="#888" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Embedding Box -->
+  <rect x="80" y="104" width="190" height="28" rx="4" fill="#378ADD" opacity="0.12"/>
+  <text x="175" y="122" text-anchor="middle" font-size="12" fill="#2C2C2C">Input Embedding</text>
+
+  <!-- + Positional Encoding hint -->
+  <rect x="115" y="134" width="120" height="18" rx="3" fill="#F0F0F0"/>
+  <text x="175" y="147" text-anchor="middle" font-size="10" fill="#777">+ Positional Encoding</text>
+
+  <!-- Arrow to Encoder Stack -->
+  <line x1="175" y1="152" x2="175" y2="168" stroke="#888" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Encoder Stack (6 layers) -->
+  <rect x="80" y="168" width="190" height="144" rx="6" fill="#E8F0FB" stroke="#378ADD" stroke-width="1.2"/>
+
+  <!-- Layer blocks inside -->
+  <rect x="92" y="178" width="166" height="18" rx="3" fill="#378ADD" opacity="0.18"/>
+  <rect x="92" y="200" width="166" height="18" rx="3" fill="#378ADD" opacity="0.22"/>
+  <rect x="92" y="222" width="166" height="18" rx="3" fill="#378ADD" opacity="0.26"/>
+  <rect x="92" y="244" width="166" height="18" rx="3" fill="#378ADD" opacity="0.30"/>
+  <rect x="92" y="266" width="166" height="18" rx="3" fill="#378ADD" opacity="0.34"/>
+  <rect x="92" y="288" width="166" height="14" rx="3" fill="#378ADD" opacity="0.38"/>
+
+  <text x="175" y="191" text-anchor="middle" font-size="10" fill="#1a5a9a">Encoder Layer 1</text>
+  <text x="175" y="213" text-anchor="middle" font-size="10" fill="#1a5a9a">Encoder Layer 2</text>
+  <text x="175" y="235" text-anchor="middle" font-size="10" fill="#1a5a9a">Encoder Layer 3</text>
+  <text x="175" y="257" text-anchor="middle" font-size="10" fill="#1a5a9a">Encoder Layer 4</text>
+  <text x="175" y="279" text-anchor="middle" font-size="10" fill="#1a5a9a">Encoder Layer 5</text>
+  <text x="175" y="299" text-anchor="middle" font-size="9" fill="#1a5a9a">Layer 6</text>
+
+  <text x="175" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#378ADD">Self-Attention + FFN ×6</text>
+
+  <!-- Encoder Single Layer Detail -->
+  <rect x="80" y="320" width="190" height="50" rx="5" fill="#DCEAFC" stroke="#378ADD" stroke-width="1"/>
+  <text x="175" y="337" text-anchor="middle" font-size="10" font-weight="600" fill="#1a5a9a">Single Encoder Layer</text>
+  <text x="175" y="352" text-anchor="middle" font-size="9" fill="#555">Multi-Head Self-Attention</text>
+  <text x="175" y="364" text-anchor="middle" font-size="9" fill="#555">+ Feed-Forward Network</text>
+
+  <!-- Dashed arrow from Encoder to Middle -->
+  <line x1="270" y1="280" x2="340" y2="280" stroke="#378ADD" stroke-width="1.5" stroke-dasharray="6,4"/>
+
+  <!-- ============ DECODER SIDE (Right) ============ -->
+
+  <!-- Decoder Label -->
+  <text x="510" y="54" text-anchor="middle" font-size="13" font-weight="700" fill="#8B3FC3">Decoder</text>
+
+  <!-- Output Shift Box -->
+  <rect x="410" y="64" width="200" height="28" rx="4" fill="#8B3FC3" opacity="0.12"/>
+  <text x="510" y="82" text-anchor="middle" font-size="12" fill="#2C2C2C">Output (shifted right)</text>
+
+  <!-- Arrow -->
+  <line x1="510" y1="92" x2="510" y2="104" stroke="#888" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Output Embedding -->
+  <rect x="410" y="104" width="200" height="28" rx="4" fill="#8B3FC3" opacity="0.12"/>
+  <text x="510" y="122" text-anchor="middle" font-size="12" fill="#2C2C2C">Output Embedding</text>
+
+  <!-- + Pos Encode -->
+  <rect x="450" y="134" width="120" height="18" rx="3" fill="#F0F0F0"/>
+  <text x="510" y="147" text-anchor="middle" font-size="10" fill="#777">+ Positional Encoding</text>
+
+  <!-- Arrow to Decoder Stack -->
+  <line x1="510" y1="152" x2="510" y2="168" stroke="#888" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Decoder Stack (6 layers) -->
+  <rect x="410" y="168" width="200" height="144" rx="6" fill="#F3E8FB" stroke="#8B3FC3" stroke-width="1.2"/>
+
+  <rect x="422" y="178" width="176" height="18" rx="3" fill="#8B3FC3" opacity="0.18"/>
+  <rect x="422" y="200" width="176" height="18" rx="3" fill="#8B3FC3" opacity="0.22"/>
+  <rect x="422" y="222" width="176" height="18" rx="3" fill="#8B3FC3" opacity="0.26"/>
+  <rect x="422" y="244" width="176" height="18" rx="3" fill="#8B3FC3" opacity="0.30"/>
+  <rect x="422" y="266" width="176" height="18" rx="3" fill="#8B3FC3" opacity="0.34"/>
+  <rect x="422" y="288" width="176" height="14" rx="3" fill="#8B3FC3" opacity="0.38"/>
+
+  <text x="510" y="191" text-anchor="middle" font-size="10" fill="#6B1FA8">Decoder Layer 1</text>
+  <text x="510" y="213" text-anchor="middle" font-size="10" fill="#6B1FA8">Decoder Layer 2</text>
+  <text x="510" y="235" text-anchor="middle" font-size="10" fill="#6B1FA8">Decoder Layer 3</text>
+  <text x="510" y="257" text-anchor="middle" font-size="10" fill="#6B1FA8">Decoder Layer 4</text>
+  <text x="510" y="279" text-anchor="middle" font-size="10" fill="#6B1FA8">Decoder Layer 5</text>
+  <text x="510" y="299" text-anchor="middle" font-size="9" fill="#6B1FA8">Layer 6</text>
+
+  <text x="510" y="302" text-anchor="middle" font-size="11" font-weight="600" fill="#8B3FC3">Masked-SA + Cross-Attn + FFN ×6</text>
+
+  <!-- Arrow to Linear+Softmax -->
+  <line x1="510" y1="312" x2="510" y2="328" stroke="#888" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Linear + Softmax -->
+  <rect x="410" y="328" width="200" height="28" rx="4" fill="#8B3FC3" opacity="0.15"/>
+  <text x="510" y="346" text-anchor="middle" font-size="11" fill="#6B1FA8">Linear + Softmax</text>
+
+  <!-- Arrow to Output -->
+  <line x1="510" y1="356" x2="510" y2="370" stroke="#888" stroke-width="1.2" marker-end="url(#arrowGray)"/>
+
+  <!-- Output Box -->
+  <rect x="430" y="370" width="160" height="26" rx="4" fill="#8B3FC3" opacity="0.12"/>
+  <text x="510" y="388" text-anchor="middle" font-size="11" fill="#2C2C2C">Output Probabilities</text>
+
+  <!-- ============ CROSS-ATTENTION CONNECTION ============ -->
+  <!-- Arrow from Encoder output to Decoder -->
+  <path d="M 230 400 L 230 414 Q 230 422 238 422 L 362 422 Q 370 422 370 414 L 370 345" 
+        stroke="#378ADD" stroke-width="1.5" fill="none" stroke-dasharray="6,4" marker-end="url(#arrowBlue)"/>
+
+  <!-- Cross-Attention Label -->
+  <rect x="252" y="418" width="96" height="16" rx="3" fill="#FAFAFA"/>
+  <text x="300" y="430" text-anchor="middle" font-size="9" font-weight="600" fill="#378ADD">Cross-Attention</text>
+
+  <!-- Marker definitions -->
+  <defs>
+    <marker id="arrowGray" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#888"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#378ADD"/>
+    </marker>
+  </defs>
+</svg>

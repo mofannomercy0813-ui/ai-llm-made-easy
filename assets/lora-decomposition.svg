@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 320">
+  <title>LoRA: Low-Rank Adaptation</title>
+  <desc>LoRA decomposition showing W' = W + B×A where W is frozen (large, grey) and B, A are trainable (small, colored). r << d is clearly indicated.</desc>
+
+  <!-- Background -->
+  <rect width="680" height="320" fill="#FAFAFA" rx="6"/>
+
+  <style>
+    text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  </style>
+
+  <!-- Title -->
+  <text x="340" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#2C2C2C">LoRA: Low-Rank Adaptation</text>
+  <text x="340" y="46" text-anchor="middle" font-size="10" fill="#888">W' = W + B · A</text>
+
+  <!-- ============ FROZEN W MATRIX ============ -->
+  <!-- Label -->
+  <text x="110" y="72" text-anchor="middle" font-size="12" font-weight="600" fill="#E89420">Frozen</text>
+  <text x="110" y="86" text-anchor="middle" font-size="10" fill="#888">(pretrained weight)</text>
+
+  <!-- W matrix (large, tall) -->
+  <rect x="30" y="94" width="160" height="144" rx="4" fill="#EEE" stroke="#CCC" stroke-width="1"/>
+  <!-- Grid inside W -->
+  <line x1="30" y1="110" x2="190" y2="110" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="30" y1="126" x2="190" y2="126" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="30" y1="142" x2="190" y2="142" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="30" y1="158" x2="190" y2="158" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="30" y1="174" x2="190" y2="174" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="30" y1="190" x2="190" y2="190" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="30" y1="206" x2="190" y2="206" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="30" y1="222" x2="190" y2="222" stroke="#DDD" stroke-width="0.5"/>
+
+  <!-- Col divisions -->
+  <line x1="56" y1="94" x2="56" y2="238" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="83" y1="94" x2="83" y2="238" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="110" y1="94" x2="110" y2="238" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="136" y1="94" x2="136" y2="238" stroke="#DDD" stroke-width="0.5"/>
+  <line x1="163" y1="94" x2="163" y2="238" stroke="#DDD" stroke-width="0.5"/>
+
+  <!-- W diagonal elements highlighted -->
+  <rect x="36" y="100" width="14" height="14" fill="#CCC" opacity="0.6" rx="1"/>
+  <rect x="60" y="116" width="14" height="14" fill="#CCC" opacity="0.6" rx="1"/>
+  <rect x="84" y="132" width="14" height="14" fill="#CCC" opacity="0.6" rx="1"/>
+  <rect x="108" y="148" width="14" height="14" fill="#CCC" opacity="0.6" rx="1"/>
+  <rect x="132" y="164" width="14" height="14" fill="#CCC" opacity="0.6" rx="1"/>
+  <rect x="156" y="180" width="14" height="14" fill="#CCC" opacity="0.6" rx="1"/>
+  <rect x="156" y="196" width="14" height="14" fill="#CCC" opacity="0.6" rx="1"/>
+  <rect x="156" y="212" width="14" height="14" fill="#CCC" opacity="0.6" rx="1"/>
+
+  <text x="110" y="170" text-anchor="middle" font-size="13" font-weight="700" fill="#999">W</text>
+
+  <!-- Dimension label -->
+  <text x="195" y="170" font-size="10" fill="#888">d×d</text>
+
+  <!-- Lock icon -->
+  <text x="110" y="248" text-anchor="middle" font-size="9" fill="#E89420">❄ frozen</text>
+
+  <!-- ============ + SIGN ============ -->
+  <text x="230" y="170" font-size="20" fill="#2C2C2C">+</text>
+
+  <!-- ============ B × A MATRICES ============ -->
+  <!-- Label -->
+  <text x="410" y="72" text-anchor="middle" font-size="12" font-weight="600" fill="#378ADD">Trainable (LoRA Adaptors)</text>
+
+  <!-- B matrix (d × r, tall and thin) -->
+  <rect x="270" y="94" width="60" height="144" rx="4" fill="#E8F0FB" stroke="#378ADD" stroke-width="1.2"/>
+  <line x1="270" y1="110" x2="330" y2="110" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="270" y1="126" x2="330" y2="126" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="270" y1="142" x2="330" y2="142" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="270" y1="158" x2="330" y2="158" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="270" y1="174" x2="330" y2="174" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="270" y1="190" x2="330" y2="190" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="270" y1="206" x2="330" y2="206" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="270" y1="222" x2="330" y2="222" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+
+  <!-- B diagonal -->
+  <rect x="276" y="100" width="8" height="8" fill="#378ADD" opacity="0.5" rx="1"/>
+  <rect x="284" y="110" width="8" height="8" fill="#378ADD" opacity="0.5" rx="1"/>
+  <rect x="292" y="120" width="8" height="8" fill="#378ADD" opacity="0.5" rx="1"/>
+  <rect x="300" y="130" width="8" height="8" fill="#378ADD" opacity="0.5" rx="1"/>
+
+  <text x="300" y="172" text-anchor="middle" font-size="13" font-weight="700" fill="#1a5a9a">B</text>
+
+  <!-- B dimension -->
+  <text x="305" y="248" text-anchor="middle" font-size="10" fill="#378ADD">d×r</text>
+
+  <!-- × sign -->
+  <text x="358" y="170" font-size="16" fill="#2C2C2C">×</text>
+
+  <!-- A matrix (r × d, short and wide) -->
+  <rect x="380" y="94" width="144" height="60" rx="4" fill="#E8F0FB" stroke="#378ADD" stroke-width="1.2"/>
+  <line x1="400" y1="94" x2="400" y2="154" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="448" y1="94" x2="448" y2="154" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+  <line x1="496" y1="94" x2="496" y2="154" stroke="#378ADD" stroke-width="0.4" opacity="0.3"/>
+
+  <!-- A diagonal -->
+  <rect x="386" y="100" width="8" height="8" fill="#378ADD" opacity="0.5" rx="1"/>
+  <rect x="394" y="110" width="8" height="8" fill="#378ADD" opacity="0.5" rx="1"/>
+  <rect x="402" y="120" width="8" height="8" fill="#378ADD" opacity="0.5" rx="1"/>
+  <rect x="410" y="130" width="8" height="8" fill="#378ADD" opacity="0.5" rx="1"/>
+
+  <text x="452" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#1a5a9a">A</text>
+
+  <!-- A dimension -->
+  <text x="452" y="170" text-anchor="middle" font-size="10" fill="#378ADD">r×d</text>
+
+  <!-- ============ RESULT ============ -->
+  <!-- = sign -->
+  <text x="562" y="170" font-size="20" fill="#2C2C2C">=</text>
+
+  <!-- W' result -->
+  <rect x="588" y="94" width="80" height="144" rx="4" fill="#EEF5EC" stroke="#0F6E56" stroke-width="1.2"/>
+  <line x1="588" y1="110" x2="668" y2="110" stroke="#0F6E56" stroke-width="0.4" opacity="0.15"/>
+  <line x1="588" y1="126" x2="668" y2="126" stroke="#0F6E56" stroke-width="0.4" opacity="0.15"/>
+  <line x1="588" y1="142" x2="668" y2="142" stroke="#0F6E56" stroke-width="0.4" opacity="0.15"/>
+  <line x1="588" y1="158" x2="668" y2="158" stroke="#0F6E56" stroke-width="0.4" opacity="0.15"/>
+  <line x1="588" y1="174" x2="668" y2="174" stroke="#0F6E56" stroke-width="0.4" opacity="0.15"/>
+  <line x1="588" y1="190" x2="668" y2="190" stroke="#0F6E56" stroke-width="0.4" opacity="0.15"/>
+  <line x1="588" y1="206" x2="668" y2="206" stroke="#0F6E56" stroke-width="0.4" opacity="0.15"/>
+  <line x1="588" y1="222" x2="668" y2="222" stroke="#0F6E56" stroke-width="0.4" opacity="0.15"/>
+
+  <text x="628" y="170" text-anchor="middle" font-size="13" font-weight="700" fill="#0F6E56">W'</text>
+
+  <!-- ============ KEY INSIGHT BOX ============ -->
+  <rect x="120" y="265" width="440" height="44" rx="6" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="0.8"/>
+
+  <!-- d = 4096 block -->
+  <rect x="140" y="276" width="90" height="22" rx="4" fill="#EEE"/>
+  <text x="185" y="291" text-anchor="middle" font-size="11" font-weight="600" fill="#666">d = 4096</text>
+
+  <!-- Arrow -->
+  <text x="240" y="292" font-size="14" fill="#888">≫</text>
+
+  <!-- r = 8 block -->
+  <rect x="262" y="276" width="70" height="22" rx="4" fill="#E8F0FB"/>
+  <text x="297" y="291" text-anchor="middle" font-size="11" font-weight="600" fill="#378ADD">r = 8</text>
+
+  <!-- Param comparison -->
+  <text x="362" y="292" font-size="11" fill="#555">W: 4096² = 16.8M  vs  B+A: 4096×8×2 ≈ 65.5K params</text>
+
+  <!-- Highlight -->
+  <rect x="570" y="280" width="70" height="18" rx="4" fill="#D5EBDF"/>
+  <text x="605" y="293" text-anchor="middle" font-size="10" font-weight="700" fill="#0F6E56">~0.4%</text>
+
+  <defs>
+    <marker id="arrowBlue" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#378ADD"/>
+    </marker>
+  </defs>
+</svg>

@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 360">
+  <title>RLHF Pipeline: Three Steps</title>
+  <desc>Three-step Reinforcement Learning from Human Feedback pipeline: SFT → Reward Model → PPO.</desc>
+
+  <!-- Background -->
+  <rect width="680" height="360" fill="#FAFAFA" rx="6"/>
+
+  <style>
+    text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  </style>
+
+  <!-- Title -->
+  <text x="340" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#2C2C2C">RLHF: Reinforcement Learning from Human Feedback</text>
+
+  <!-- ============ Panel 1: SFT ============ -->
+  <rect x="20" y="48" width="196" height="220" rx="8" fill="#EEF5EC" stroke="#0F6E56" stroke-width="1.2"/>
+
+  <rect x="20" y="48" width="196" height="30" rx="8" fill="#0F6E56" opacity="0.9"/>
+  <rect x="20" y="62" width="196" height="16" rx="0" fill="#0F6E56" opacity="0.9"/>
+  <text x="118" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#FFF">Step 1: SFT</text>
+
+  <text x="118" y="96" text-anchor="middle" font-size="11" font-weight="600" fill="#0F6E56">Supervised Fine-Tuning</text>
+
+  <!-- Human icon simplified -->
+  <circle cx="62" cy="130" r="12" fill="#0F6E56" opacity="0.2"/>
+  <circle cx="62" cy="126" r="5" fill="#0F6E56" opacity="0.5"/>
+  <ellipse cx="62" cy="140" rx="8" ry="5" fill="#0F6E56" opacity="0.5"/>
+
+  <text x="82" y="132" font-size="10" fill="#555">Human writes</text>
+  <text x="82" y="144" font-size="10" fill="#555">demo answers</text>
+
+  <!-- Arrow down -->
+  <line x1="118" y1="152" x2="118" y2="168" stroke="#0F6E56" stroke-width="1.2" marker-end="url(#arrowGreen)"/>
+
+  <!-- Model box -->
+  <rect x="48" y="170" width="140" height="36" rx="5" fill="#FFF" stroke="#0F6E56" stroke-width="1"/>
+  <text x="118" y="186" text-anchor="middle" font-size="10" fill="#0F6E56">Pretrained LLM</text>
+  <text x="118" y="198" text-anchor="middle" font-size="9" fill="#888">copies demonstrations</text>
+
+  <!-- Result -->
+  <rect x="48" y="218" width="140" height="36" rx="5" fill="#D5EBDF"/>
+  <text x="118" y="234" text-anchor="middle" font-size="10" font-weight="600" fill="#0F6E56">SFT Model</text>
+  <text x="118" y="248" text-anchor="middle" font-size="9" fill="#0F6E56">imitates human</text>
+
+  <!-- ============ Arrow 1→2 ============ -->
+  <line x1="216" y1="158" x2="248" y2="158" stroke="#888" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <!-- ============ Panel 2: RM ============ -->
+  <rect x="252" y="48" width="196" height="220" rx="8" fill="#FFF3E8" stroke="#E89420" stroke-width="1.2"/>
+
+  <rect x="252" y="48" width="196" height="30" rx="8" fill="#E89420" opacity="0.9"/>
+  <rect x="252" y="62" width="196" height="16" rx="0" fill="#E89420" opacity="0.9"/>
+  <text x="350" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#FFF">Step 2: RM</text>
+
+  <text x="350" y="96" text-anchor="middle" font-size="11" font-weight="600" fill="#C77A10">Reward Model Training</text>
+
+  <!-- SFT model generates -->
+  <rect x="272" y="108" width="156" height="24" rx="4" fill="#FFF" stroke="#E89420" stroke-width="0.8"/>
+  <text x="350" y="124" text-anchor="middle" font-size="9" fill="#C77A10">SFT generates N responses</text>
+
+  <line x1="350" y1="132" x2="350" y2="144" stroke="#E89420" stroke-width="1" marker-end="url(#arrowOrange)"/>
+
+  <!-- Human ranks -->
+  <circle cx="302" cy="164" r="10" fill="#E89420" opacity="0.2"/>
+  <circle cx="302" cy="160" r="4" fill="#E89420" opacity="0.5"/>
+  <ellipse cx="302" cy="172" rx="7" ry="4" fill="#E89420" opacity="0.5"/>
+
+  <text x="320" y="162" font-size="10" fill="#555">Human ranks</text>
+  <text x="320" y="176" font-size="10" fill="#555">best to worst</text>
+
+  <line x1="350" y1="184" x2="350" y2="196" stroke="#E89420" stroke-width="1" marker-end="url(#arrowOrange)"/>
+
+  <!-- RM learns -->
+  <rect x="282" y="198" width="136" height="28" rx="5" fill="#FFF" stroke="#E89420" stroke-width="1"/>
+  <text x="350" y="212" text-anchor="middle" font-size="10" fill="#C77A10">RM learns scoring</text>
+  <text x="350" y="224" text-anchor="middle" font-size="8" fill="#888">(Bradley-Terry model)</text>
+
+  <!-- Result -->
+  <rect x="282" y="234" width="136" height="24" rx="5" fill="#FDECD2"/>
+  <text x="350" y="250" text-anchor="middle" font-size="10" font-weight="600" fill="#C77A10">Reward Model</text>
+
+  <!-- ============ Arrow 2→3 ============ -->
+  <line x1="448" y1="158" x2="480" y2="158" stroke="#888" stroke-width="1.5" marker-end="url(#arrowGray)"/>
+
+  <!-- ============ Panel 3: PPO ============ -->
+  <rect x="484" y="48" width="176" height="220" rx="8" fill="#EBF0F8" stroke="#378ADD" stroke-width="1.2"/>
+
+  <rect x="484" y="48" width="176" height="30" rx="8" fill="#378ADD" opacity="0.9"/>
+  <rect x="484" y="62" width="176" height="16" rx="0" fill="#378ADD" opacity="0.9"/>
+  <text x="572" y="68" text-anchor="middle" font-size="12" font-weight="700" fill="#FFF">Step 3: PPO</text>
+
+  <text x="572" y="96" text-anchor="middle" font-size="11" font-weight="600" fill="#1a5a9a">RL Optimization</text>
+
+  <!-- Loop icon -->
+  <ellipse cx="572" cy="135" rx="50" ry="40" fill="none" stroke="#378ADD" stroke-width="1" stroke-dasharray="4,3" opacity="0.4"/>
+
+  <!-- Model generates -->
+  <rect x="510" y="110" width="124" height="22" rx="4" fill="#FFF" stroke="#378ADD" stroke-width="0.8"/>
+  <text x="572" y="125" text-anchor="middle" font-size="9" fill="#1a5a9a">Model generates</text>
+
+  <!-- Arrow in loop -->
+  <path d="M 622 135 Q 630 135 630 145 L 630 165" stroke="#378ADD" stroke-width="1" fill="none" marker-end="url(#arrowBlue)"/>
+
+  <!-- RM scores -->
+  <rect x="510" y="150" width="124" height="22" rx="4" fill="#FFF" stroke="#378ADD" stroke-width="0.8"/>
+  <text x="572" y="165" text-anchor="middle" font-size="9" fill="#1a5a9a">RM scores output</text>
+
+  <!-- Arrow up left -->
+  <path d="M 510 157 Q 498 157 498 140 L 510 127" stroke="#378ADD" stroke-width="1" fill="none"/>
+
+  <!-- RL update arrow -->
+  <path d="M 522 172 Q 512 180 512 190 L 512 200" stroke="#378ADD" stroke-width="1" fill="none" marker-end="url(#arrowBlue)"/>
+
+  <!-- PPO Update -->
+  <rect x="510" y="202" width="124" height="28" rx="5" fill="#E8F0FB" stroke="#378ADD" stroke-width="1"/>
+  <text x="572" y="214" text-anchor="middle" font-size="10" font-weight="600" fill="#1a5a9a">PPO Policy Update</text>
+  <text x="572" y="226" text-anchor="middle" font-size="8" fill="#666">(KL penalty from SFT)</text>
+
+  <!-- Result -->
+  <rect x="510" y="240" width="124" height="24" rx="5" fill="#DCEAFC"/>
+  <text x="572" y="256" text-anchor="middle" font-size="10" font-weight="600" fill="#1a5a9a">Aligned LLM ✓</text>
+
+  <!-- ============ Bottom arrow ============ -->
+  <text x="340" y="290" text-anchor="middle" font-size="11" font-weight="600" fill="#555">Data: Human Labels → Rankings → Rewards</text>
+  <text x="340" y="308" text-anchor="middle" font-size="11" font-weight="600" fill="#555">Human involvement decreases → Automation increases</text>
+
+  <!-- Legend -->
+  <rect x="100" y="326" width="480" height="24" rx="4" fill="#F0F0F0"/>
+  <rect x="115" y="332" width="18" height="12" rx="2" fill="#0F6E56" opacity="0.25"/>
+  <text x="138" y="342" font-size="9" fill="#555">SFT (Supervised)</text>
+  <rect x="240" y="332" width="18" height="12" rx="2" fill="#E89420" opacity="0.25"/>
+  <text x="263" y="342" font-size="9" fill="#555">RM (Ranking)</text>
+  <rect x="358" y="332" width="18" height="12" rx="2" fill="#378ADD" opacity="0.25"/>
+  <text x="381" y="342" font-size="9" fill="#555">PPO (RL)</text>
+
+  <defs>
+    <marker id="arrowGray" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#888"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#0F6E56"/>
+    </marker>
+    <marker id="arrowOrange" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#E89420"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#378ADD"/>
+    </marker>
+  </defs>
+</svg>

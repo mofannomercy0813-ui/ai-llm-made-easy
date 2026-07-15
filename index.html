@@ -1,0 +1,2193 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 大模型不难 —— 一本让零基础读者也能笑着看懂 Transformer 的开源书</title>
+<style>
+/* ── Reset & Base ─────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC",
+               "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB",
+               "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #2C2C2A;
+  background: #FAFBFC;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Book Container ──────────────────────────────────── */
+#book {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+/* ── Book Header ──────────────────────────────────────── */
+.book-header {
+  text-align: center;
+  padding: 3rem 0 2rem;
+  border-bottom: 2px solid #E8E6DE;
+  margin-bottom: 2.5rem;
+}
+
+.book-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #1a1a18;
+  margin-bottom: 0.5rem;
+}
+
+.book-subtitle {
+  font-size: 1.1rem;
+  color: #6E6D68;
+  margin-bottom: 0.3rem;
+}
+
+.book-meta {
+  font-size: 0.9rem;
+  color: #9A9994;
+}
+
+/* ── TOC ──────────────────────────────────────────────── */
+.toc {
+  background: #FFFFFF;
+  border: 1px solid #E8E6DE;
+  border-radius: 8px;
+  padding: 1.8rem 2rem;
+  margin-bottom: 3rem;
+}
+
+.toc-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #1a1a18;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid #E8E6DE;
+}
+
+.toc-list {
+  list-style: none;
+}
+
+.toc-part {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #9A9994;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  margin-top: 1rem;
+  padding: 0.2rem 0 0.1rem;
+  border-top: 1px dotted #E8E6DE;
+}
+
+.toc-part:first-child {
+  margin-top: 0;
+  border-top: none;
+}
+
+.toc-lesson {
+  padding: 0.15rem 0;
+}
+
+.toc-lesson a {
+  color: #2C2C2A;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.98rem;
+  transition: color 0.15s;
+}
+
+.toc-lesson a:hover {
+  color: #378ADD;
+}
+
+.toc-h2 {
+  padding: 0.08rem 0 0.08rem 1.8rem;
+}
+
+.toc-h2 a {
+  color: #6E6D68;
+  text-decoration: none;
+  font-size: 0.88rem;
+  transition: color 0.15s;
+}
+
+.toc-h2 a:hover {
+  color: #378ADD;
+}
+
+/* ── Lesson Sections ──────────────────────────────────── */
+.lesson {
+  margin-bottom: 3rem;
+  padding-top: 1rem;
+  border-top: 1px solid #E8E6DE;
+}
+
+.lesson:first-of-type {
+  border-top: none;
+}
+
+.lesson-part-label {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #9A9994;
+  text-transform: none;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.8rem;
+  padding: 0.2rem 0.6rem;
+  background: #F1EFE8;
+  border-radius: 3px;
+}
+
+/* ── Headings ─────────────────────────────────────────── */
+.lesson h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: #1a1a18;
+  line-height: 1.35;
+  margin: 0.5rem 0 1.2rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #E8E6DE;
+}
+
+.lesson h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2C2C2A;
+  margin: 2rem 0 0.8rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid #378ADD;
+}
+
+.lesson h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #444;
+  margin: 1.5rem 0 0.5rem;
+}
+
+/* ── Paragraphs & Inline ──────────────────────────────── */
+.lesson p {
+  margin: 0 0 1.1rem;
+  text-align: justify;
+  text-justify: inter-ideograph;
+}
+
+.lesson strong {
+  font-weight: 600;
+  color: #1a1a18;
+}
+
+.lesson em {
+  font-style: italic;
+}
+
+/* ── Links ────────────────────────────────────────────── */
+.lesson a {
+  color: #378ADD;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.lesson a:hover {
+  border-bottom-color: #378ADD;
+}
+
+/* ── Horizontal Rules ─────────────────────────────────── */
+.lesson hr {
+  border: none;
+  border-top: 1px dotted #D4D2C8;
+  margin: 2rem 0;
+}
+
+/* ── Blockquotes ──────────────────────────────────────── */
+.lesson blockquote {
+  margin: 1.5rem 0;
+  padding: 0.8rem 1.2rem;
+  background: #F7F6F1;
+  border-left: 3px solid #D4D2C8;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.lesson blockquote p {
+  margin: 0.3rem 0;
+}
+
+.lesson blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Code Inline ──────────────────────────────────────── */
+.lesson code {
+  font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono",
+               "Cascadia Code", "Consolas", "Courier New", monospace;
+  font-size: 0.88em;
+  background: #F1EFE8;
+  color: #C75B39;
+  padding: 0.15em 0.35em;
+  border-radius: 3px;
+}
+
+/* ── Code Blocks ──────────────────────────────────────── */
+.lesson pre {
+  background: #F1EFE8;
+  border: 1px solid #E0DDD3;
+  border-radius: 6px;
+  padding: 1rem 1.2rem;
+  margin: 1.2rem 0;
+  overflow-x: auto;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.lesson pre code {
+  background: none;
+  color: #2C2C2A;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* ── Lists ────────────────────────────────────────────── */
+.lesson ul,
+.lesson ol {
+  margin: 0.8rem 0 1.2rem 1.5rem;
+}
+
+.lesson li {
+  margin-bottom: 0.35rem;
+  line-height: 1.7;
+}
+
+.lesson li p {
+  margin: 0;
+}
+
+/* ── Tables ───────────────────────────────────────────── */
+.lesson table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+.lesson thead th {
+  background: #F1EFE8;
+  color: #2C2C2A;
+  font-weight: 600;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #E0DDD3;
+  text-align: left;
+}
+
+.lesson tbody td {
+  padding: 0.5rem 0.8rem;
+  border: 1px solid #E8E6DE;
+}
+
+.lesson tbody tr:nth-child(even) {
+  background: #FAFAF8;
+}
+
+/* ── SVG Figures ──────────────────────────────────────── */
+.svg-figure {
+  margin: 2rem 0;
+  text-align: center;
+  background: #FFFFFF;
+  border: 1px solid #E8E6DE;
+  border-radius: 8px;
+  padding: 1.5rem 1rem;
+}
+
+.svg-figure svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.svg-figure figcaption {
+  margin-top: 0.8rem;
+  font-size: 0.85rem;
+  color: #9A9994;
+  font-style: italic;
+}
+
+/* ── Lesson Navigation ────────────────────────────────── */
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid #E8E6DE;
+  font-size: 0.92rem;
+}
+
+.lesson-nav a {
+  color: #378ADD;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+
+.lesson-nav a:hover {
+  color: #185FA5;
+}
+
+.lesson-nav .nav-center {
+  color: #9A9994;
+}
+
+.lesson-nav .nav-center:hover {
+  color: #6E6D68;
+}
+
+.nav-disabled {
+  color: #CCC;
+}
+
+/* ── Footer ───────────────────────────────────────────── */
+.book-footer {
+  text-align: center;
+  padding: 3rem 0 2rem;
+  margin-top: 3rem;
+  border-top: 2px solid #E8E6DE;
+  color: #9A9994;
+  font-size: 0.88rem;
+  line-height: 1.8;
+}
+
+.book-footer a {
+  color: #378ADD;
+  text-decoration: none;
+}
+
+/* ── Print Styles ─────────────────────────────────────── */
+@media print {
+  body {
+    background: #FFFFFF;
+    color: #000;
+    font-size: 12pt;
+    line-height: 1.6;
+  }
+
+  #book {
+    max-width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  .book-header {
+    padding: 1rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #000;
+  }
+
+  .book-title {
+    font-size: 18pt;
+  }
+
+  .toc {
+    page-break-after: always;
+    border: none;
+    background: none;
+    padding: 1rem 0;
+  }
+
+  .toc a {
+    color: #000 !important;
+  }
+
+  .lesson {
+    page-break-before: always;
+    border-top: none;
+    margin-bottom: 1rem;
+  }
+
+  .lesson:first-of-type {
+    page-break-before: avoid;
+  }
+
+  .lesson h1 {
+    font-size: 14pt;
+    border-bottom: 1px solid #000;
+  }
+
+  .lesson h2 {
+    font-size: 12pt;
+    border-left: 2px solid #000;
+  }
+
+  .lesson-part-label {
+    background: none;
+    border: 1px solid #000;
+  }
+
+  .lesson-nav {
+    display: none;
+  }
+
+  .svg-figure {
+    border: none;
+    background: none;
+    padding: 1rem 0;
+  }
+
+  .lesson pre {
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+  }
+
+  .lesson code {
+    background: #f0f0f0;
+  }
+
+  .book-footer {
+    border-top: 1px solid #000;
+    color: #666;
+  }
+
+  @page {
+    margin: 2cm;
+    @bottom-center {
+      content: counter(page);
+      font-size: 9pt;
+      color: #999;
+    }
+  }
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  #book {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .book-title {
+    font-size: 1.8rem;
+  }
+
+  .lesson h1 {
+    font-size: 1.4rem;
+  }
+
+  .lesson h2 {
+    font-size: 1.1rem;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<article id="book">
+
+<header class="book-header">
+  <h1 class="book-title">AI 大模型不难</h1>
+  <p class="book-subtitle">一本让零基础读者也能笑着看懂 Transformer 的开源电子书</p>
+  <p class="book-meta">共 27 课 · 五大部分 · 从零到面试通关</p>
+</header>
+
+<nav id="toc" class="toc">
+<h2 class="toc-title">目录</h2>
+<ol class="toc-list">
+<li class="toc-part">开篇</li>
+<li class="toc-lesson"><a href="#lesson-0">第 0 课 · 第 0 课：这本书怎么读 + 大模型五分钟全景图</a></li>
+<li class="toc-h2"><a href="#第-0-课开篇这本书怎么读-大模型五分钟全景图">第 0 课：开篇，这本书怎么读 + 大模型五分钟全景图</a></li>
+<li class="toc-h2"><a href="#第-1-5-课世界观大模型到底是个什么东西">第 1-5 课：世界观，大模型到底是个什么东西</a></li>
+<li class="toc-h2"><a href="#第-6-13-课引擎transformer-里里外外">第 6-13 课：引擎，Transformer 里里外外</a></li>
+<li class="toc-h2"><a href="#第-14-19-课炼金模型是怎么训出来的">第 14-19 课：炼金，模型是怎么训出来的</a></li>
+<li class="toc-h2"><a href="#第-20-24-课落地大模型的十八般武艺">第 20-24 课：落地，大模型的十八般武艺</a></li>
+<li class="toc-h2"><a href="#第-25-26-课实战面试现场还原">第 25-26 课：实战，面试现场还原</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-part">第一部分：世界观 —— 大模型到底是个什么东西</li>
+<li class="toc-lesson"><a href="#lesson-1">第 1 课 · 第 1 课：Token、预训练、微调，三个词讲完大模型的一生</a></li>
+<li class="toc-h2"><a href="#追问模块面试官可能怎么问">追问模块：面试官可能怎么问</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-2">第 2 课 · 第 2 课：涌现和幻觉，大模型的两个「意料之外」</a></li>
+<li class="toc-h2"><a href="#追问模块面试官可能怎么问">追问模块：面试官可能怎么问</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-3">第 3 课 · 第 3 课：你怎么跟模型说话，Prompt + CoT + ICL</a></li>
+<li class="toc-h2"><a href="#追问模块面试官可能怎么问">追问模块：面试官可能怎么问</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-4">第 4 课 · 第 4 课：RLHF 五分钟速览，让模型从「能说话」到「说人话」</a></li>
+<li class="toc-h2"><a href="#追问模块面试官可能怎么问">追问模块：面试官可能怎么问</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-5">第 5 课 · 第 5 课：省钱的三个办法，量化、蒸馏、分布式</a></li>
+<li class="toc-h2"><a href="#追问模块面试官可能怎么问">追问模块：面试官可能怎么问</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-part">第二部分：引擎 —— Transformer 里里外外</li>
+<li class="toc-lesson"><a href="#lesson-6">第 6 课 · 第 6 课：Transformer 到底是什么</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-7">第 7 课 · 第 7 课：Attention 公式，手写一遍就懂了</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-8">第 8 课 · 第 8 课：多头注意力，为什么一个头不够</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-9">第 9 课 · 第 9 课：位置编码，模型怎么知道词顺序</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-10">第 10 课 · 第 10 课：残差连接，梯度的高速公路</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-11">第 11 课 · 第 11 课：LayerNorm，BN 在图像界称王，NLP 为什么不行</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-12">第 12 课 · 第 12 课：Pre-norm vs Post-norm，安检放哪的问题</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-13">第 13 课 · 第 13 课：两种 Mask，为什么模型必须戴眼镜</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-part">第三部分：炼金 —— 模型是怎么训出来的</li>
+<li class="toc-lesson"><a href="#lesson-14">第 14 课 · 第 14 课：参数 vs 数据，容器和内容</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-15">第 15 课 · 第 15 课：MLM vs CLM，两种截然不同的教法</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-16">第 16 课 · 第 16 课：RLHF 全流程，SFT → RM → PPO</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-17">第 17 课 · 第 17 课：DPO 和 GRPO，更聪明的对齐方式</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-18">第 18 课 · 第 18 课：LoRA，穷玩大模型的终极答案</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-19">第 19 课 · 第 19 课：训练硬核补充，过拟合、梯度、Warmup、ZeRO</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-part">第四部分：落地 —— 大模型的十八般武艺</li>
+<li class="toc-lesson"><a href="#lesson-20">第 20 课 · 第 20 课：RAG，让模型会查资料</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-21">第 21 课 · 第 21 课：推理优化全家桶</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-22">第 22 课 · 第 22 课：AI Agent，让模型会干活</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-23">第 23 课 · 第 23 课：MCP / A2A / Function Call，让模型会叫外援</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-24">第 24 课 · 第 24 课：前沿架构，MoE、GQA、DeepSeek 怎么玩的</a></li>
+<li class="toc-h2"><a href="#追问模块">追问模块</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-part">第五部分：实战 —— 面试现场还原</li>
+<li class="toc-lesson"><a href="#lesson-25">第 25 课 · 第 25 课：大厂真题精讲（上）</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+<li class="toc-lesson"><a href="#lesson-26">第 26 课 · 第 26 课：大厂真题精讲（下）+ 系统设计 + 项目讲述</a></li>
+<li class="toc-h2"><a href="#思考题">思考题</a></li>
+</ol>
+</nav>
+
+
+<section id="lesson-0" class="lesson">
+  <div class="lesson-part-label">开篇</div>
+  <h1>第 0 课：这本书怎么读 + 大模型五分钟全景图</h1>
+<p>事情是这样的。</p>
+<p>三个月前我在准备一个 AI 方向的技术面。我翻出了一份网上流传的「大模型面试八股」，打印出来厚厚一沓，心想背完就稳了。</p>
+<p>背到第三天我就崩溃了。</p>
+<p>不是因为记不住。是因为我发现每个词都能被面试官追着问，你知道 LoRA 的原理是吧？那跟 QLoRA 的区别呢？为什么不用 Adapter 呢？Prompt Tuning 是不是就更简单？你实际落地过吗？调参踩过什么坑？</p>
+<p>我就坐在那，看着纸上密密麻麻的「标准回答」，感觉自己像一个背了整本字典但说不出一句完整话的人。</p>
+<p>坦率的讲，这种感觉太糟了。</p>
+<p>我跟你说，市面上关于大模型的教程不是太少，是太多，多到让人不知道该看哪个。而且它们有一种神奇的能力，能把一个其实不算复杂的东西，包装成需要先学五门前置课程才能碰的「高深学问」。你去看论文吧，一上来就是 Attention(Q,K,V)=Softmax(QK^T/√dₖ)V，你心想这堆字母都是啥。去看视频吧，老师讲得挺认真，但你脑子已经开始盘算今晚点什么外卖了。去看面经吧，一个接一个的 Q&amp;A，看完第五个忘了第三个。</p>
+<p>我就是在这种「这特么到底怎么学」的状态里，硬着头皮啃了两个多月。</p>
+<p>后来我发现了一件事。</p>
+<p>大模型里那些让人头大的概念，其实每一个都可以用一个生活里的比喻讲清楚。不是那种「让我们用一个简单的例子来理解」的假比喻，是真的、你能在脑子里像放电影一样跑通的故事。比如 Attention 就是你在图书馆查资料，Q 是你的问题，K 是每本书的索引标签，V 是书的内容。比如残差连接就是传话游戏里每个人都额外拿到一张原话的复印件。比如 LayerNorm 就是把全班 50 人的身高统一成一个标准尺子。</p>
+<p>一旦你脑子里有了这个画面，再把公式放上去，你就会发现，哦，原来这个符号就是在做刚才那件事。</p>
+<p>说真的，这种感觉太爽了。</p>
+<p>所以就有了这本书。</p>
+<p>《AI 大模型不难》是一本用比喻和图解讲大模型核心概念的开源书。它不是为了替代那些严谨的论文和代码教程，LLMs-from-scratch 和 Happy-LLM 已经做得足够好。它做的是那件被很多人忽略的事：在你拿起论文之前，先在你脑子里放一个「直觉锚点」。让你知道这个东西大概是个什么感觉，然后再去看细节。</p>
+<p>我把你在面试里可能会遇到的全部知识点，整理成了 26 课，分五个部分。</p>
+<hr />
+<h2 id="第-0-课开篇这本书怎么读-大模型五分钟全景图">第 0 课：开篇，这本书怎么读 + 大模型五分钟全景图</h2>
+<h2 id="第-1-5-课世界观大模型到底是个什么东西">第 1-5 课：世界观，大模型到底是个什么东西</h2>
+<p>Token 是乐高积木，预训练是搭底座，微调是换主题。涌现是量变引起质变，幻觉是一本正经胡说八道。你还会学到怎么跟模型说话（Prompt Engineering），为什么它有时候会「多想想再说」（CoT），以及 RLHF 是怎么让模型从会说人话变成会说好话的。</p>
+<h2 id="第-6-13-课引擎transformer-里里外外">第 6-13 课：引擎，Transformer 里里外外</h2>
+<p>这是全书最硬核的一块，也是面试里被问得最多的一块。从 Attention 公式手写开始，到多头注意力、位置编码、残差连接、LayerNorm、Pre-norm 和 Post-norm 的恩怨情仇、再到 Padding Mask 和 Causal Mask。每一课都配了手绘图解，就是那种你看一眼就能在脑子里留下来的图解。</p>
+<h2 id="第-14-19-课炼金模型是怎么训出来的">第 14-19 课：炼金，模型是怎么训出来的</h2>
+<p>参数是脑容量，数据是读过的书，大了没用，小了不够。Chinchilla 论文告诉你为什么烧钱也要烧对地方。RLHF 从 SFT 到 Reward Model 到 PPO 三步全拆。还有 DPO 和 GRPO 这些更聪明的对齐方式，以及 LoRA 这个穷玩大模型的终极答案。</p>
+<h2 id="第-20-24-课落地大模型的十八般武艺">第 20-24 课：落地，大模型的十八般武艺</h2>
+<p>RAG 是怎么让模型学会查资料的，KV Cache 和 vLLM 是怎么让模型跑得更快的，Agent 是怎么从「告诉你怎么做」变成「直接帮你做完」的，MCP 和 A2A 这些协议是怎么让模型学会打电话叫外援的。还有 MoE、GQA、DeepSeek 这些最新架构到底在卷什么。</p>
+<h2 id="第-25-26-课实战面试现场还原">第 25-26 课：实战，面试现场还原</h2>
+<p>10 道真实大厂面试题，加上一道系统设计大题。不是给标准答案，是还原一个面试官的追问路径，他们怎么从一个「定义题」一路问到「架构题」。</p>
+<hr />
+<p>我知道这个目录看起来有点长。二十六课。。。</p>
+<p>你不需要从头到尾读。真的不需要。</p>
+<p>这本书设计了三条阅读路径，你可以对号入座。</p>
+<p><strong>如果你是一个完全的初学者</strong>，你可能刚转行，或者还在读书，没碰过 Transformer。那建议你老老实实从第 1 课开始，顺着读。前面的 5 课世界观会帮你铺好地基，等你到了 Transformer 那 8 课的时候，就不会觉得这些东西是从天上掉下来的。</p>
+<p><strong>如果你明天就要面试</strong>，你没时间读 26 课，你只想活过明天。那你直接跳到第 25 和第 26 课，看大厂真题。看到哪个概念你不熟，反查目录跳到那一课。每课都自带「追问模块」，面试官可能会怎么问你，你应该怎么答。配合那个看，效率最高。</p>
+<p><strong>如果你已经有点基础了</strong>，你可能用过 GPT，调过 LoRA，但对 RoPE 是啥、GRPO 跟 DPO 有啥区别这种问题还说不清楚。那你可以从任一课开始，当成词典用。每一课都是独立的，不需要前情提要。</p>
+<p>说实话我也不知道这本书能写到什么程度。</p>
+<p>我自己也还在摸索，有些东西我到现在也不敢说完全搞懂了。写这本书的过程，对我自己来说也是个重新学习的过程。有时候为了把一个概念讲清楚，我得翻来覆去换七八种比喻，最后可能发现，最土的那个比喻反而是最准的。</p>
+<p>但这种感觉还挺好的。</p>
+<p>就是那种，你终于把一个之前觉得「这特么是什么鬼」的东西，用自己的话讲给一个完全不懂的朋友听，然后他一脸恍然大悟地说「哦！原来就是这个意思啊」，的感觉。</p>
+<p>我希望你读完这本书的时候，也能有这种感觉。</p>
+<p>如果你读完某一课，能关掉手机，用自己的话给同桌的人讲清楚 Attention 是什么、LoRA 为什么好使、大模型为什么必须戴 Mask，那这本书就没白写。</p>
+<p>好了，地图画完了。</p>
+<p>下面这张图，就是未来 26 课你要走的路。</p>
+<hr />
+<figure class="svg-figure">
+<svg viewBox="0 0 680 520"  role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>AI 大模型世界地图 —— 26 课学习路径</title>
+  <desc>五个部分：世界观、引擎、炼金、落地、实战，共 26 课</desc>
+
+  <!-- Background -->
+  <rect width="680" height="520" fill="#FAFBFC"/>
+
+  <!-- Title -->
+  <text x="340" y="32" text-anchor="middle" font-family="sans-serif" font-size="16" font-weight="500" fill="#2C2C2A">AI 大模型世界地图</text>
+  <text x="340" y="52" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888780">26 课，五站旅程——从零到面试通关</text>
+
+  <!-- ===== PART 0: INTRO ===== -->
+  <circle cx="340" cy="90" r="22" fill="#E6F1FB" stroke="#378ADD" stroke-width="1.5"/>
+  <text x="340" y="94" text-anchor="middle" font-family="sans-serif" font-size="13" font-weight="500" fill="#0C447C">开篇</text>
+  <text x="340" y="128" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#888780">第 0 课 · 地图</text>
+
+  <!-- Arrow 0→1 -->
+  <line x1="340" y1="112" x2="340" y2="148" stroke="#378ADD" stroke-width="1.5"/>
+  <polygon points="336,144 340,152 344,144" fill="#378ADD"/>
+
+  <!-- ===== PART 1: WORLDVIEW ===== -->
+  <rect x="50" y="156" width="580" height="52" rx="10" fill="#E6F1FB" stroke="#85B7EB" stroke-width="1"/>
+  <text x="70" y="180" font-family="sans-serif" font-size="13" font-weight="500" fill="#0C447C">第一部分：世界观 —— 大模型到底是个什么东西</text>
+  <text x="70" y="198" font-family="sans-serif" font-size="11" fill="#185FA5">第 1-5 课：Token · 涌现与幻觉 · Prompt/CoT/ICL · RLHF 速览 · 量化/蒸馏/分布式</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="340" y1="208" x2="340" y2="232" stroke="#378ADD" stroke-width="1.5"/>
+  <polygon points="336,228 340,236 344,228" fill="#378ADD"/>
+
+  <!-- ===== PART 2: ENGINE ===== -->
+  <rect x="50" y="240" width="580" height="68" rx="10" fill="#E6F1FB" stroke="#378ADD" stroke-width="1"/>
+  <text x="70" y="264" font-family="sans-serif" font-size="13" font-weight="500" fill="#0C447C">第二部分：引擎 —— Transformer 里里外外</text>
+  <text x="70" y="284" font-family="sans-serif" font-size="11" fill="#185FA5">第 6-13 课：Transformer · Attention 手写 · 多头注意力 · 位置编码 ·</text>
+  <text x="70" y="300" font-family="sans-serif" font-size="11" fill="#185FA5">残差连接 · LayerNorm · Pre/Post-norm · 两种 Mask</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="340" y1="308" x2="340" y2="332" stroke="#378ADD" stroke-width="1.5"/>
+  <polygon points="336,328 340,336 344,328" fill="#378ADD"/>
+
+  <!-- ===== PART 3: TRAINING ===== -->
+  <rect x="50" y="340" width="580" height="52" rx="10" fill="#EEEDFE" stroke="#AFA9EC" stroke-width="1"/>
+  <text x="70" y="364" font-family="sans-serif" font-size="13" font-weight="500" fill="#3C3489">第三部分：炼金 —— 模型是怎么训出来的</text>
+  <text x="70" y="382" font-family="sans-serif" font-size="11" fill="#534AB7">第 14-19 课：参数量/数据量 · MLM/CLM · RLHF 全流程 · DPO/GRPO · LoRA · 训练硬核</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="340" y1="392" x2="340" y2="412" stroke="#7F77DD" stroke-width="1.5"/>
+  <polygon points="336,408 340,416 344,408" fill="#7F77DD"/>
+
+  <!-- ===== PART 4: ENGINEERING ===== -->
+  <rect x="50" y="420" width="580" height="52" rx="10" fill="#FAECE7" stroke="#F0997B" stroke-width="1"/>
+  <text x="70" y="444" font-family="sans-serif" font-size="13" font-weight="500" fill="#993C1D">第四部分：落地 —— 大模型的十八般武艺</text>
+  <text x="70" y="462" font-family="sans-serif" font-size="11" fill="#D85A30">第 20-24 课：RAG · 推理优化 · Agent · MCP/A2A · 前沿架构(MoE/DeepSeek)</text>
+
+  <!-- Arrow 4→5 -->
+  <line x1="340" y1="472" x2="340" y2="488" stroke="#D85A30" stroke-width="1.5"/>
+  <polygon points="336,484 340,492 344,484" fill="#D85A30"/>
+
+  <!-- ===== PART 5: INTERVIEW ===== -->
+  <circle cx="340" cy="504" r="14" fill="#1D9E75" stroke="#0F6E56" stroke-width="1"/>
+  <text x="340" y="508" text-anchor="middle" font-family="sans-serif" font-size="10" font-weight="500" fill="#FFFFFF">实战</text>
+  <text x="370" y="508" font-family="sans-serif" font-size="11" fill="#0F6E56">第 25-26 课 · 大厂面试</text>
+</svg>
+<figcaption>AI 大模型世界地图</figcaption>
+</figure>
+
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>看完上面的目录，挑一个你最感兴趣的概念，用一句话说清楚它大概是个什么东西。不需要精确，不需要公式，就用你自己的话。</p>
+</li>
+<li>
+<p>你觉得为什么现在大家聊 AI 都喜欢用名词轰炸，RoPE、MoE、SwiGLU、GRPO，而不是用正常人的语言？这到底是必要的精确性，还是一种行业习惯？</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <span class="nav-disabled">← 上一课</span>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-1">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-1" class="lesson">
+  <div class="lesson-part-label">第一部分：世界观 —— 大模型到底是个什么东西</div>
+  <h1>第 1 课：Token、预训练、微调，三个词讲完大模型的一生</h1>
+<p>我第一次用 ChatGPT 的时候，问了它一个问题。</p>
+<p>「今天天气怎么样？」</p>
+<p>它回了一长串，格式工整，语气温和，还贴心地提醒我带伞。</p>
+<p>我当时就愣住了。。。</p>
+<p>不是因为它回答得好。是因为我突然意识到，我完全不知道它是怎么「看懂」我这句话的。我是打了几个字上去，它给我回了一堆字。中间发生了什么？「今天天气怎么样」这六个汉字，是怎么变成它脑子里那些数字的？</p>
+<p>后来我才搞明白。整个事情，其实三个词就能讲完。</p>
+<p>Token。预训练。微调。</p>
+<hr />
+<p>你看过乐高吗。</p>
+<p>就是那种一堆小零件，你可以拼成城堡、拼成飞机、拼成一只莫名其妙的大恐龙。大模型的世界跟乐高几乎一模一样。</p>
+<p>Token 就是乐高零件。</p>
+<p>大模型不会直接读汉字，也不会直接读英文单词。它只能处理数字。所以你输入的任何文本，第一步都要被切碎，变成一堆小零件。比如「我喜欢吃苹果」，可能被切成「我」「喜欢」「吃」「苹果」四块积木，也可能切成更碎的「我」「喜」「欢」「吃」「苹」「果」。</p>
+<p>这个切碎的过程叫 Tokenization。每一块碎片就是一个 Token。</p>
+<p>你可能会想，为什么不干脆一个字一个 Token？因为那样太浪费了。比如「苹果」作为一个词，它不应该被拆成「苹」和「果」来理解，「苹果」就是苹果，不是两个部首的排列组合。好的切词器会把高频词组打包成一个 Token，低频生僻字再拆碎。常用的词用一个积木表示，生僻字用好几个积木拼起来。</p>
+<p>GPT-4 的词汇表大概有 10 万个 Token。也就是说这个乐高厂只生产 10 万种标准零件，全世界的语言都得用这 10 万种零件来拼。</p>
+<p>屏幕前的你，可以打开 OpenAI 的 Tokenizer 工具自己玩一下，很有意思。输入「我爱北京天安门」，它告诉你切成了几个 Token，每个 Token 长什么样，编号是多少。我第一次玩这个的时候，真的有一种「卧槽，原来模型是这么看文字的」的感觉。</p>
+<p>每种零件配一个编号，比如 「我」 是 1284 号，「喜欢」 是 7621 号，「苹果」 是 30419 号。于是一句「我喜欢吃苹果」，在模型眼里其实是「1284, 7621, 2103, 30419」，一串数字。</p>
+<p>乐高零件放进去了。接下来呢。</p>
+<hr />
+<p>接下来就是预训练。</p>
+<p>预训练这件事，用乐高来比喻特别简单，我觉得。</p>
+<p>就是把你扔进一个巨大的仓库，里面有几万亿块乐高零件，已经有人帮你拼好了。可能是拼成了故事书，拼成了维基百科，拼成了几百万本小说。你的任务不是去数有多少块，而是去学习这些零件之间是怎么组合的。「我」这个词后面经常跟「喜欢」，而不是「桌子」。「今天天气」后面大概率是「怎么样」或者「不错」。</p>
+<p>模型做的就是这样一件事。它把整个互联网上的文本，大概几十万亿个 Token，当成一本超级厚的乐高说明书，一页一页地翻，一遍一遍地猜。</p>
+<p>怎么猜呢。给它看半句话「今天天气怎么」，让它猜下一个 Token 是什么。它猜「样」，猜对了就不动。猜错了就调一下自己的乐高拼法，下次争取猜对。猜完「样」之后，再给它「今天天气怎么样」，让它猜再下一个。就这么一个词一个词地猜，猜几十万亿次。</p>
+<p>这个猜词游戏就是大模型的全部童年。</p>
+<p>猜了几十万亿次之后，模型「学会」了语言。它学会了主谓宾结构，「我吃饭」通顺，「饭吃我」不通顺。它学会了常识，天是蓝的，草是绿的，巴黎在法国。它甚至学会了一些推理，如果 A 比 B 高，B 比 C 高，那 A 比 C 高。</p>
+<p>但它还没有学会「帮你写周报」或者「回答你的面试题」。</p>
+<p>它只是一个通晓语言的乐高大师。你给它一堆零件，它能拼出符合语法的东西。但它拼出来的不一定是你想要的。</p>
+<p>这就像一个厨师学徒，在厨房里看了几十万道菜的制作过程，学会了切菜、炒菜、调味。他现在能做出像样的菜，但他不知道你点的是宫保鸡丁还是清蒸鲈鱼。你得告诉他。</p>
+<p>这就是微调。</p>
+<hr />
+<p>微调就是在预训练的基础上，让你的乐高大师学会特定的任务。</p>
+<p>坦率的讲，预训练是全世界大模型共享的底座。不管你是 GPT-4、Claude、Llama 还是 Qwen，它们的预训练过程几乎一模一样，都是猜词、猜词、再猜词。差异只在数据量和算力上。</p>
+<p>但微调不一样。微调决定了这个模型是「谁的模型」。</p>
+<p>你想让它帮你写代码？你就喂它几万条「需求描述→代码实现」的例子。想让它帮你写周报？就喂它几万条「要点→周报」的例子。想让它帮你做客服？就喂它几万条「用户提问→客服回复」的例子。</p>
+<p>微调的数据量比预训练小得多，可能只有几百万条，而不是几十万亿个 Token。但每条数据都是精心挑选的、有正确答案的、符合你需求的东西。模型只需要在这些高质量数据上再做一遍「猜词游戏」，就能把自己的能力从「会说话」调成「会写你需要的这种话」。</p>
+<p>有点像你雇了一个哈佛毕业生来你公司，他什么都懂，但不懂你们公司的内部流程。你给他看了几百份你们公司写过的报告，三天之后他就能写出跟你老板风格一模一样的邮件了。他的底子是哈佛给的，但他的业务能力是你教的。</p>
+<p>我跟你说，这就是为什么你看到市面上有几百个不同版本的 Llama 模型。大家用的都是 Meta 发布的同一个基础版 Llama，但有的人把它调成了医学问答专家，有的人把它调成了法律文书起草工具，还有的人把它调成了二次元老婆聊天机器人。</p>
+<p>底座一样，微调不同，能力就不同。</p>
+<hr />
+<p>聊完这三个概念，还有一个东西必须要提，上下文窗口。</p>
+<p>回到乐高的比喻。你的乐高大师有一个工作台。台子有多大，他同时能处理多少块乐高。</p>
+<p>这就是上下文窗口，就是模型一次能「看到」的最大 Token 数量。GPT-4 早期是 8K，现在新出的 DeepSeek-V4 Pro 能做到 1M，也就是一次能把一百万个 Token 的东西同时摆在桌子上。</p>
+<p>你可能会觉得，越大不是越好吗。</p>
+<p>其实吧，也不是。因为台子越大，大师在大量的积木里找该用的那块就越费劲。而且台子大了租金就贵，运行成本直接跟上下文窗口长度挂钩。你让模型读完一本 500 页的书再回答问题，比让它读一个 200 字的短信贵好几百倍。</p>
+<p>所以上下文窗口是一个权衡。不是越大越好，是够用就好。</p>
+<hr />
+<p>说真的，我第一次把 Token、预训练、微调这三个概念串起来的时候，感觉整个大模型世界的拼图终于完整了。</p>
+<p>Token 是原料。预训练是把原料变成通晓语言的大脑。微调是给这个大脑分配具体的工作。</p>
+<p>你在大街上看到的每一个 AI 产品，ChatGPT、Claude、文心一言、豆包、你手机里的智能助手，背后都是这三个步骤。区别只是谁家的原料更丰富，谁家的预训练更扎实，谁家的微调更懂你。</p>
+<p>而我们接下来要讲的 Transformer、Attention、LoRA、RAG、Agent 这些东西，只不过是这条流水线上不同环节的「螺丝怎么拧」，它们都是为了让这三个步骤做得更快、更好、更便宜。</p>
+<p>好了，三个词讲完了。</p>
+<p>你看。</p>
+<p>不复杂吧。</p>
+<hr />
+<h2 id="追问模块面试官可能怎么问">追问模块：面试官可能怎么问</h2>
+<p><strong>追问 1：「Token 和词有什么区别？为什么不做分词而要做 Tokenization？」</strong></p>
+<p>词会变。每年都有新词，从摆烂到栓Q到遥遥领先。如果用词表，你的模型每年都要更新词表。Tokenization 的厉害之处在于，它把常见固定组合打包，生僻的全部拆成子词（subword），所以任何新词，哪怕是你刚发明的，也能用已有子词拼出来。一个 10 万 Token 的词表可以覆盖人类的几乎所有语言。</p>
+<p><strong>追问 2：「预训练是无监督的，微调是有监督的，中间发生了什么？」</strong></p>
+<p>预训练的「无监督」其实是个假象。它不是无监督，而是用文本本身创造了监督信号。给你半句话让你猜下一个词，正确答案就是原文的下一个词。不需要人标注，互联网上每篇文章自己就是考题+答案。这就是为什么预训练可以做到几十万亿 Token 量级，数据几乎是免费的。</p>
+<p><strong>追问 3：「预训练和微调之间还有什么？什么是 SFT？」</strong></p>
+<p>SFT 是监督微调，就是给模型喂「人类觉得好的回答」让它模仿。在 RLHF 那一课我们会详细讲，现在你只需要知道，预训练→SFT→RLHF 是一条完整的「从会说话到会说好话」的训练流水线。</p>
+<p><strong>追问 4：「上下文窗口 1M Token 是什么概念？一本书够吗？」</strong></p>
+<p>一本《三体》英文版大概 60 万 Token。所以 1M Token 相当于一本半《三体》一起扔进去。对于绝大多数日常应用，写邮件、回答问题、分析文档，8K 到 32K 就足够了。1M 的能力更多是给做长文档分析、全量代码审查、知识库问答这些场景准备的。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>打开任意一个 AI 对话工具（ChatGPT、DeepSeek、豆包都行），输入「请你把这句话切成 Token」，然后发一句话给它。看看它切出来的 Token 跟你想象的一样吗。哪个词被拆碎了你最意外？</p>
+</li>
+<li>
+<p>如果你要为一个奶茶店训练一个客服机器人，你觉得预训练阶段需要做什么？微调阶段又需要准备什么数据？试着用今天学的三个概念描述一下这个过程。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-0">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-2">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-2" class="lesson">
+  <div class="lesson-part-label">第一部分：世界观 —— 大模型到底是个什么东西</div>
+  <h1>第 2 课：涌现和幻觉，大模型的两个「意料之外」</h1>
+<p>2022 年 8 月，Google 的研究员发了一篇论文。</p>
+<p>他们测了 GPT-3 在不同参数规模下的几百种能力。13 亿参数的时候不会加法，65 亿参数的时候也不会，1300 亿参数也不会。然后到了 1750 亿参数的时候，砰。突然就会了。</p>
+<p>不是说 1300 亿的时候错得少一点、1750 亿的时候错得更少一点。不是那种「从 60 分慢慢涨到 80 分」的进步曲线。是直接从 20 分跳到了 80 分。</p>
+<p>他们就给这个现象起了个名字。涌现。</p>
+<p>我到现在都觉得这个词取得特别好。因为那种感觉就是你往水里一直加盐，加了一勺没咸，加了两勺没咸，加到第三勺突然咸了，但不应该是第二勺就开始有点咸、第三勺更咸吗？盐溶于水一直是线性的啊。</p>
+<p>大模型不是。</p>
+<p>大模型的能力增长是非线性的。</p>
+<p>这就是今天要聊的第一件事。</p>
+<hr />
+<p>你在厨房烧过水吧。</p>
+<p>水从 20 度加热到 99 度，它都是水。热的，但不是蒸汽。100 度那一瞬间，相变发生了，水变成了蒸汽，性质完全变了。在 99 度和 100 度之间，没有那种「稍微变成了一点蒸汽」的中间状态。</p>
+<p>涌现就是 AI 的相变。</p>
+<p>GPT-3 在 130 亿参数的时候做三位数加法完全是蒙的，准确率接近 10%（四选一瞎猜都有 25% 的水平）。但到了 1750 亿参数，准确率突然跳到接近 60%。不是慢慢学的，就是某一个参数阈值附近，能力突然出现了。</p>
+<p>翻译也是一样。小模型翻译出来的东西像机翻，语法对但没人味儿。大模型突然就能翻出带语感的东西了。没人教它翻译理论，它就是读了足够多的双语文本之后，自己「悟」出来的。</p>
+<p>说真的，这也是为什么 OpenAI、Google、Anthropic 这些公司愿意花几亿美元去训练更大的模型。因为他们不知道下一轮规模会解锁什么新能力。每次 scale up 都像开盲盒。你只知道 Loss 在降（这个可以用 Scaling Law 预测出来），但你不知道降着降着会突然冒出来什么。</p>
+<p>可能是推理能力。</p>
+<p>可能是代码生成能力。</p>
+<p>可能是用表情包跟人类沟通的能力。。。不是，最后这个还没出现。但谁知道呢。</p>
+<p>我跟你说，这种感觉太赤鸡了。你对一个系统投入了几千万美元的电费和算力，然后每天早晨起床第一件事就是跑一遍测试，看看它昨晚又学会了什么新东西。就像养了一个每天都会突然变聪明一点的小孩。</p>
+<p>但涌现有另一面。</p>
+<hr />
+<p>我让 ChatGPT 给我推荐三本关于明朝历史的书。</p>
+<p>它列了三本。书名看起来非常专业，有副标题、有出版社、有一段内容简介。写得真好啊，好到我差点就下单了。</p>
+<p>然后我搜了一下。这三本书全都不存在。作者名字是编的，出版社是拼凑的，内容简介是它根据「明朝历史书的常见套路」推断出来的。</p>
+<p>这就是幻觉。</p>
+<p>大模型有时候会说谎。不是因为它想骗你，是因为它说到底就是一个「猜下一个词」的机器。当你问它一个它不确定的问题时，它不是在查资料，它是在猜哪些词组合在一起看起来最像正确答案。</p>
+<p>坦率的讲，这个问题的根子在预训练里就埋下了。预训练阶段，模型被训练成了一个超级语言模式识别器，它学的是什么词经常一起出现，什么句式在什么语境下使用。它没有学会「我应该先确定这事实是不是真的再说话」。</p>
+<p>它的逻辑是，如果我问你明朝的皇帝有哪些，历史上出现最多的那种帝王名字组合，就是我要给你的答案。</p>
+<p>听起来很离谱对吧。你想想看，如果一个人类这样做，「这个问题的正确答案应该长什么样？好，大概就是这个格式，往里面填几个看起来专业的词」，这个人会被抓起来吧。但在大模型的世界里，这恰恰是它的工作原理。</p>
+<p>目前最有效的缓解方案是 RLHF，就是让人类标注员给模型的回答打分，然后训练模型生成高分回答。我们在第 16 课会详细讲。但说实话，即使在 GPT-4 这个用了大量 RLHF 的模型上，幻觉也没有被彻底解决。它只是从「经常胡说八道」变成了「偶尔胡说八道」。</p>
+<p>你在用任何 AI 产品的时候，脑子里都得有一个预期，它给你的一切信息，都有可能不是真的。尤其是数字、日期、人名、引文。这些是大模型幻觉的重灾区。</p>
+<p>愚钝如我，刚用 ChatGPT 的时候也踩过这个坑。我让它帮我查一个 GitHub 仓库的 star 数，它给了一个精确到个位的数字，我直接复制进报告了。还好同事在发出去之前扫了一眼，发现那个数字是我问它那天的两倍。</p>
+<p>说真的，尴尬到脚趾抠地。</p>
+<hr />
+<p>涌现有另一件事值得提一下。开源和闭源。</p>
+<p>你可能听过 Llama、Qwen、DeepSeek 这些名字。它们都是开源模型，Meta、阿里巴巴、深度求索这些公司把模型权重公开了，任何人可以下载、部署、甚至二次训练。</p>
+<p>为什么会有人愿意开源？几十亿美金训练出来的东西，白白送出去？</p>
+<p>其实吧，这跟涌现也有关系。</p>
+<p>当一个开源模型的参数规模没有达到涌现阈值的时候，它的表现确实不如闭源模型。但一旦突破了那个阈值，开源模型在一些任务上已经能跟闭源打得有来有回了。这导致一个很有趣的局面，Meta 开源 Llama 之后，全世界的开发者都在上面做微调。这些微调反馈回来的数据和经验，反过来帮助 Meta 改进下一版 Llama。</p>
+<p>开源不是纯粹的利他主义。是一种「我用社区的力量帮我迭代」的策略。</p>
+<p>闭源的优势在于安全对齐和商业服务。OpenAI 可以花几千个人工时去做 safety red-teaming，确保 GPT-4 不会教人做炸弹。开源模型的拥有者做不到这个规模的投入。所以很多企业在严肃场景下仍然选闭源，不是因为闭源模型更强，是因为出了问题有人负责。</p>
+<p>但这条线正在模糊。DeepSeek 的开源模型在很多 benchmark 上已经追平或者超过同期的闭源模型了。怎么说呢。</p>
+<p>变天了。</p>
+<hr />
+<p>你看，大模型的世界里有两个意料之外。</p>
+<p>一个是好的，涌现。参数大了，能力突然就来了，像水烧开的一瞬间。没人能预测下一轮会在哪个方向涌现什么新能力。</p>
+<p>一个是不太好的，幻觉。参数大不大它都可能胡说八道，只不过参数大了之后它胡说八道得更加一本正经、更难发现。</p>
+<p>这两个意外叠加在一起，就是你今天使用任何 AI 产品时的底色。它可以给你惊喜，但也可能给你惊吓。它回答问题的时候自信满满，但你永远需要保持着一丝怀疑。</p>
+<p>这种关系，其实还挺像跟一个特别聪明但偶尔记错事的朋友相处的。</p>
+<p>你知道他大多数时候是对的。但你学会了在想引用他的话之前，自己再查一遍。</p>
+<hr />
+<h2 id="追问模块面试官可能怎么问">追问模块：面试官可能怎么问</h2>
+<p><strong>追问 1：「涌现是不是只有在 LLM 里才有？」</strong></p>
+<p>不是。涌现是复杂系统的通用属性。蚁群里每只蚂蚁的行为很简单，但整个蚁群能建造复杂巢穴。鱼群里的每条鱼只有几条规则，但整个鱼群能做出精确的集体转向。大模型只是涌现现象的一个新案例。</p>
+<p><strong>追问 2：「你怎么区分模型是真的理解了，还是在靠模式匹配蒙的？」</strong></p>
+<p>这个问题目前没有完美答案。有些人用 benchmark 成绩来证明「理解了」，但 model 可能在训练数据里见过这些 benchmark 的答案。有些人用对抗样本测试（故意给奇怪的问题看它会不会崩溃）。最诚实的态度是，我们不知道它是不是真的理解了，但它在足够多的测试上表现出了理解的行为。</p>
+<p><strong>追问 3：「为什么不用外部知识库解决幻觉问题，让模型查了再回答不就行了？」</strong></p>
+<p>这就是 RAG 的思路，第 20 课会详细讲。但 RAG 也不是银弹，检索到的资料可能不相关，模型可能忽略检索结果继续编，检索本身也需要大量工程优化。幻觉是一个系统性问题，需要多层防御。</p>
+<p><strong>追问 4：「开源模型的涌现能力和同期的闭源模型比怎么样？」</strong></p>
+<p>同等参数规模下，通常闭源更强，因为闭源团队在数据清洗、训练技巧、RLHF 上投入更多。但开源追赶速度极快。以 Llama 为例，Meta 每代开源模型的性能大概比上一代的闭源模型晚 6-12 个月，但这个差距在缩小。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>下次你用 ChatGPT 或任何 AI 助手时，问它一个你完全知道答案的问题（比如你老家的著名景点），然后追问「你确定吗？」看它的反应。把这段对话记录下来，分析它是真的知道还是在「表演知道」。</p>
+</li>
+<li>
+<p>你觉得生活中还有什么东西是涌现的结果？不一定跟技术有关，社会现象、个人成长、团队协作都可能有涌现。试着找一个例子，描述一下它的「相变点」是什么。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-1">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-3">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-3" class="lesson">
+  <div class="lesson-part-label">第一部分：世界观 —— 大模型到底是个什么东西</div>
+  <h1>第 3 课：你怎么跟模型说话，Prompt + CoT + ICL</h1>
+<p>我朋友上个月第一次用 ChatGPT。他输入了四个字。</p>
+<p>「写个方案。」</p>
+<p>ChatGPT 给他生成了两页纸，关于一个完全不知道是什么的方案。他看了一眼，说这玩意不行。</p>
+<p>我跟他说，你这不是在用 AI，你这是在跟一个刚入职、没见过你的、不知道你公司做什么的实习生说话。你跟他说「写个方案」，他能写出来才有鬼。</p>
+<p>你跟大模型说话的方式，决定了它给你什么。</p>
+<p>这东西有个正经名字，叫 Prompt Engineering。听起来很唬人，其实就是学会怎么给模型下指令。</p>
+<hr />
+<p>说真的，Prompt Engineering 不是什么高深的技术。它更像一种手艺。</p>
+<p>你想想看，你点外卖的时候也不会只写「吃的」两个字。你会写「一份大份黄焖鸡，微辣，多加土豆，不要香菜」。Prompt 就是这个意思，只不过你点的不是外卖，你点的是内容。</p>
+<p>有个框架特别好记，叫 CRISP。</p>
+<p>C 是 Context，上下文。你得告诉模型它现在是谁、在什么场景下、面对什么人。「你是一个有十年经验的 Python 后端工程师，正在给实习生写代码 review 意见。」</p>
+<p>R 是 Role，角色。让模型扮演一个特定身份，比直接下指令效果好得多。「你是一个毒舌但真诚的美食评论家」比「写一个关于这家餐厅的评价」强一百倍。</p>
+<p>I 是 Instruction，指令。你要它做什么，做到什么程度，什么格式。越具体越好。「写 300 字，用 Markdown 格式，分三段，每段一个小标题。」</p>
+<p>S 是 Style，风格。语气、文风、复杂度。「用初中生能看懂的语言」「模仿鲁迅的杂文风格」「写得像小红书种草文案」。</p>
+<p>P 是 Purpose，目的。你要这个回答拿去干什么。这会影响它选什么信息、用什么语气。「这份材料要发给投资人看的」「这是一个内部团队分享的 PPT」。</p>
+<p>你把这五个要素配齐了，Prompt 的质量会直接上一个台阶。我自己的习惯是，每次写 Prompt 之前先在脑子里过一遍这五个字母，过完了再写。习惯之后，这就是本能反应了。</p>
+<hr />
+<p>但有时候你就算 Prompt 写得再好，模型还是算不对。</p>
+<p>比如「356 乘以 789 等于多少？」</p>
+<p>模型可能会给你一个非常自信但完全错误的答案。不是它不努力，是因为它不擅长一口气做多步推理，它是在「猜」这个计算结果长什么样，而不是真的在算。</p>
+<p>这时候你就需要 Chain-of-Thought，思维链。简称 CoT。</p>
+<p>做法极其简单，就一句话，加在你的 Prompt 末尾。</p>
+<p>「让我们一步步思考。」</p>
+<p>就这么五个字。</p>
+<p>然后模型就会像考试时在草稿纸上写演算过程一样，一步步拆解。「首先，356 乘以 700 等于 249200。然后，356 乘以 80 等于 28480。最后，356 乘以 9 等于 3204。三个加起来，249200+28480+3204=280884。」</p>
+<p>准确率直接从蒙变成了对。</p>
+<p>为啥呢。</p>
+<p>因为当你让模型「一步步思考」的时候，它在生成每一步的时候都在贪婪地预测下一步应该是什么。第一步算对了，第二步建立在第一步之上，错的概率就小很多。如果让它一口气输出答案，它可能在第二步就算错了，然后后面的全完蛋。</p>
+<p>CoT 不仅限于数学。任何需要推理的任务，逻辑题、代码调试、多条件分析，加上「让我们一步步思考」，效果都显著提升。</p>
+<p>有意思的是，这句话不是研究者刻意设计出来的人造指令。是他们发现模型自己就会这么做，你只要提醒它而已。</p>
+<p>还有一种更有意思的玩法。</p>
+<p>你不需要告诉模型「怎么思考」，你直接给它看几个例子。</p>
+<p>比如你想让它帮你把「我今天好累啊」翻译成英文。你不写 Prompt，你就直接在对话里贴两行。</p>
+<p>「今天天气真好 → The weather is really nice today。这本书太无聊了 → This book is so boring。我今天好累啊 →」</p>
+<p>模型会自动接上「I'm so tired today」。</p>
+<p>这就是 In-Context Learning，上下文学习。你不用告诉它规则，你给它看几个例子，它自己就能学会模式。你不需要微调，不需要改参数，不需要训练任何东西。</p>
+<p>输入几个例子。模型自动泛化。</p>
+<p>ICL 的关键在于例子的质量和多样性。如果你的例子太单一，模型学会的模式就很窄。如果你的例子质量太差（比如翻译水平很烂），模型学出来的也好不到哪去。</p>
+<p>而且 ICL 跟你放入例子的顺序也有关系。把相似类型的例子放一起，比把不同类型的例子混着放效果更好。这是个经验规则，还没有完美的理论解释，但它确实有效。</p>
+<p>你想想看，这其实挺神奇的。一个有 1750 亿参数的模型，你不需要动它任何一个参数，只要在输入里给它看两三个例子，它就能立刻学会你想要的模式。这就像一个从来没学过法语的人，你给他看了三个英语翻译成法语的例子，他突然就能开始翻译了。</p>
+<p>涌现又来了一次。</p>
+<hr />
+<p>说真的，我觉得 Prompt Engineering、CoT、ICL 这三样东西，放在一起，是普通人能发挥大模型最大威力的组合拳。</p>
+<p>先给上下文和角色，让模型进入状态。然后给一两个好的例子，让它知道你要什么格式。最后在指令里加上一句「请一步步推理」，让它不要省略中间过程。</p>
+<p>你会发现在这套组合拳下，模型的输出质量会有一个肉眼可见的飞跃。</p>
+<p>屏幕前的你，哪怕你现在什么 Prompt 技巧都不会，只记住两件事就够了。</p>
+<p>第一，把要求写具体。不要「写个方案」，要「写一个针对大学生的校园奶茶店的营销方案，预算 5000 元，分线上和线下两个渠道，各三项具体措施」。</p>
+<p>第二，需要推理时加上「让我们一步步思考」。</p>
+<p>就这两条，能解决你 80% 的使用场景。</p>
+<p>剩下的 20%，靠 CRISP 框架、例子引导和 RAG（第 20 课）来补充。</p>
+<p>好了。你现在会用模型了。</p>
+<hr />
+<h2 id="追问模块面试官可能怎么问">追问模块：面试官可能怎么问</h2>
+<p><strong>追问 1：「Prompt Engineering 是工程学还是玄学？」</strong></p>
+<p>目前更接近工程学，有系统的方法论（CRISP 框架、少样本学习、迭代优化），也有大量的量化实验支撑。但它依然依赖经验直觉，同样的 Prompt 在不同的模型上可能效果完全不同。正在变得越来越工程化，但还没到「保证可复现」的程度。</p>
+<p><strong>追问 2：「CoT 和直接要求输出详细过程的区别在哪？」</strong></p>
+<p>CoT 的关键在于「推理步骤的顺序」。如果你要求模型「输出详细过程」但不指定方向，它可能先猜答案再编过程。CoT 的「一步步来」强制模型按顺序推理，先算 A，基于 A 算 B，基于 B 得出结论。逻辑链条一旦断裂，错误就会暴露。</p>
+<p><strong>追问 3：「ICL 本质上是不是微调的一种近似？」</strong></p>
+<p>有个理论叫「meta-learning during inference」。模型在预训练时见过海量的模式，ICL 只是在推理时通过示例激活了跟示例模式最接近的「已存在」能力。但最近也有一些研究认为 ICL 确实在做隐式的梯度更新，这是一个还在争论的问题。面试时说「当前没有共识」就够了。</p>
+<p><strong>追问 4：「Prompt Engineering 工程师这个岗位的护城河是什么？」</strong></p>
+<p>坦率的讲，入门门槛极低。但做好的门槛极高。好的 Prompt 工程师靠的是对模型行为模式的深度直觉、对下游任务的精准理解、以及系统化的调试能力。一个月薪 5000 的 Prompt 工程师和一个月薪 5 万的差距，不在于谁写的 Prompt 更长。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>打开一个 AI 对话工具，用同一个任务（比如「帮我写一封请假邮件」）分别试两种 Prompt：一种只写「帮我写请假邮件」，一种用 CRISP 框架写完整版。对比两个结果，差距最大的是什么维度？</p>
+</li>
+<li>
+<p>CoT 对数学和逻辑有用，但对写诗或者讲故事有用吗？为什么？试着找一个你觉得 CoT 完全帮不上忙的任务，分析一下原因。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-2">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-4">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-4" class="lesson">
+  <div class="lesson-part-label">第一部分：世界观 —— 大模型到底是个什么东西</div>
+  <h1>第 4 课：RLHF 五分钟速览，让模型从「能说话」到「说人话」</h1>
+<p>2020 年，GPT-3 刚出来的时候，有一个很尴尬的问题。</p>
+<p>你跟它说「给我讲个笑话」，它可能给你讲一个。但如果你跟它说「教我怎么做一个炸弹」，它也可能真的给你列一份详细的材料清单和制作步骤。</p>
+<p>不是因为它邪恶。是因为它没有「什么该说、什么不该说」的概念。预训练阶段，它的任务只有一个，猜下一个词。它见过的所有文本里，既有教科书也有炸弹制作手册。它分不清哪个是「好」的回答，哪个是「坏」的回答。它只知道哪些词组合在一起是通顺的。</p>
+<p>于是就有了 RLHF。</p>
+<p>RLHF 的全称是 Reinforcement Learning from Human Feedback，基于人类反馈的强化学习。名字很长，拆开只有三步。</p>
+<p>我找一个你一定听得懂的比喻。</p>
+<hr />
+<p>想象你是一个脱口秀新人。你能说完整的句子，语法正确，语调流畅，这是你的预训练基础。但你说的段子不好笑，你的节奏很奇怪，你甚至不知道什么话题在台上是禁忌。</p>
+<p>你的经纪人说，行吧，我先给你请个家教。</p>
+<p>这就是第一步，SFT。</p>
+<p>Supervised Fine-Tuning，监督微调。经纪人请了一个有经验的脱口秀编剧，手把手教你写段子。给你看了一百个经典段子，告诉你每一个段子的包袱是怎么抖的、节奏是怎么控制的。你照着学，照着练，把那些好段子的模式内化成了自己的能力。你学会了怎么开头、怎么铺垫、怎么在最后一秒反转。</p>
+<p>练完之后，你从一个「会说完整句子的普通人」变成了一个「能写出及格段子的脱口秀学员」。</p>
+<p>但你离上台还有差距。你的段子有时候还是不好笑，你自己感觉不到。</p>
+<p>你的经纪人想了个办法。他在台下放了一排评委。</p>
+<p>这就是第二步，RM。</p>
+<p>Reward Model，奖励模型。评委们的工作很简单，你每讲一个段子，他们打分。笑出声的给高分，冷笑话给低分，冒犯到观众的给负分。评委会经过长时间的训练，学会了准确判断一个段子的好笑程度、冒犯程度、节奏感。</p>
+<p>现在你有了一个明确的目标，让你的评委打高分。</p>
+<p>这就是第三步，PPO。</p>
+<p>Proximal Policy Optimization。你不用再听编剧手把手教了，你只需要不断讲段子，评委给你打分，你根据分数调整自己的讲法。分数高的表达方式多保留，分数低的表达方式少用。一遍一遍，一轮一轮。</p>
+<p>你讲了一万遍之后，经纪人告诉你，可以上台了。</p>
+<p>那天晚上你站在聚光灯下。你说了一个自己写的段子，全场爆笑。你即兴加了一个现挂，笑声更大了。没有人知道你是被三万条标注数据和一个奖励模型训练出来的。</p>
+<p>他们说，你是天才。</p>
+<hr />
+<p>你看，这就是 RLHF 的三步。</p>
+<p>SFT 是请家教，用人类写的最好的回答给你打样。RM 是请评委，训练一个模型来判断什么样的回答人类喜欢。PPO 是无限彩排，让模型不断生成回答、评委不断打分、模型不断根据自己的分数调整策略。</p>
+<p>其实吧，很多人以为 GPT-4 的强大只是因为它参数量大。</p>
+<p>不是的。参数量大只能让它「知道得多」。RLHF 让它「知道什么该说、怎么说」。你把这两件事拆开看，就会发现大模型的能力有三个来源。大量的数据让它有了知识储备。巨大的参数量让它有了理解复杂模式的能力。而 RLHF 让它的输出符合人类偏好。</p>
+<p>少了任何一个，你看到的 ChatGPT 都不会是今天这个样子。</p>
+<p>在第 16 课我们会把 RLHF 拆开揉碎了讲，SFT 的损失函数、RM 的标注方法、PPO 的 Clip 机制和 KL 散度约束。但今天你只需要记住一句话。</p>
+<p>RLHF 就是让模型从「会说话」变成「会说人话」的最后一步。</p>
+<p>至于为什么这一步这么重要，你想想你身边有没有那种「什么都懂但说话特别难听」的人。他们就是没有经过 RLHF 的 GPT-3。</p>
+<hr />
+<h2 id="追问模块面试官可能怎么问">追问模块：面试官可能怎么问</h2>
+<p><strong>追问 1：「为什么不能跳过 SFT 直接做 PPO？」</strong></p>
+<p>因为 PPO 需要奖励信号来引导优化。如果你不让模型先学会基本的「好回答长什么样」，它会在一个巨大的搜索空间里乱撞，奖励信号极其稀疏，根本收敛不了。SFT 的作用是把模型先送到「好回答」的附近，PPO 再在这个基础上精调。</p>
+<p><strong>追问 2：「RLHF 和普通的 Prompt Engineering 有什么区别？」</strong></p>
+<p>Prompt 是在推理时改变模型的输入，不改动模型任何参数。RLHF 是在训练阶段改模型的参数，永远改变了模型的行为。Prompt 是一次性的，换个对话就没了。RLHF 是永久性的。</p>
+<p><strong>追问 3：「既然 RLHF 这么好，为什么不是所有模型都做？」</strong></p>
+<p>成本。SFT 需要人类写几千到几万条高质量回答，一条可能要花十几分钟甚至更久。RM 需要人类做大量的偏好排序标注。PPO 需要同时维护四个模型（策略模型、参考模型、奖励模型、价值模型），计算资源是普通训练的几倍。所以真正做完整 RLHF 的模型其实没有你想象的那么多。很多开源模型只做到 SFT 就停了。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>用你自己的经历想一个 RLHF 的例子，你什么时候被外界的反馈（奖励或惩罚）改变了你的行为方式？这个过程和机器被 RLHF 训练有什么相似和不同？</p>
+</li>
+<li>
+<p>如果 RM 奖励模型本身有偏见，比如所有标注员都觉得「回答问题越长越好」，用这个 RM 训练出来的模型会变成什么样？有没有可能 RLHF 反而让模型变差了？</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-3">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-5">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-5" class="lesson">
+  <div class="lesson-part-label">第一部分：世界观 —— 大模型到底是个什么东西</div>
+  <h1>第 5 课：省钱的三个办法，量化、蒸馏、分布式</h1>
+<p>GPT-4 的训练成本大概是 1 亿美元。</p>
+<p>这个数字够你在北京买两套四合院，或者在你老家那个三线城市买一整个小区。而我给你这本书的所有内容加在一起，训练成本是零，因为我没训模型。</p>
+<p>但如果你真的想做一个自己的模型，哪怕是在开源模型上做微调，你也会撞上三座大山。</p>
+<p>显存不够。训练太慢。模型太大跑不动。</p>
+<p>所以这一课我们聊三个省钱的办法。量化、蒸馏、分布式训练。</p>
+<hr />
+<p>先说量化。</p>
+<p>你看过照片的 RAW 格式吗。一张 RAW 照片可能有 50 MB，颜色深度是 14 bit，记录了传感器捕捉到的每一个光子信息。但你发朋友圈的那张 JPG 可能只有 2 MB，颜色深度只有 8 bit，你根本看不出区别。</p>
+<p>量化干的就这件事。</p>
+<p>模型参数在训练时通常用 FP32 存储，每个参数用 32 个比特位来表达一个浮点数。32 个 0 和 1 的组合，可以表达极其精确的数值。但问题是，你真的需要这么精确吗。</p>
+<p>一个 7B 参数的模型，FP32 下光存参数就要 7,000,000,000 × 4 字节 = 28 GB。这还只是参数本身，不算优化器状态、不算 KV Cache、不算推理时的中间激活。一张 A100 显卡也就 80 GB 显存，你连跑都跑不动。</p>
+<p>我们把每个参数从 FP32（32 位）压缩到 INT8（8 位）。显存立刻砍掉四分之三，28 GB 变成 7 GB。再从 INT8 压到 INT4（4 位），变成 3.5 GB。</p>
+<p>一张 RTX 4090 就能跑了。</p>
+<p>量化的核心假设是模型参数里其实没有那么多「有效信息」。大部分参数的值可以用更粗糙的精度来表示，对最终结果影响极小。就像你拍的照片里，绝大多数颜色变化人眼根本分辨不出来，14 bit 的色深有大量冗余。</p>
+<p>但量化不是免费的午餐。压太狠了模型会变傻。</p>
+<p>FP16 几乎无损。INT8 有轻微精度下降，但大多数任务上感知不到。INT4 在某些推理任务上会有明显的质量折损，尤其是数学和代码生成。NT4 往下基本就是学术研究了。</p>
+<p>目前最主流的两种量化方法是 GPTQ 和 AWG。名字不重要，你只需要知道 GPTQ 更快，AWQ 更准，选哪个取决于你是图省事还是图效果。</p>
+<hr />
+<p>跟量化逻辑截然不同的另一个办法，叫蒸馏。</p>
+<p>量化是把一个胖子塞进小码衣服里。蒸馏是让一个大师傅教一个小学徒。</p>
+<p>你有一个千亿参数的大模型，它很聪明但太笨重了，带不出门。你想训练一个只有十亿参数的小模型，让它学会大模型的核心能力。</p>
+<p>做法是这样的。你拿着同样的问题，同时去问大模型和小模型。大模型给出答案，这个答案就是小模型的「标准答案」。小模型照着学，不断调整自己的参数，直到它的输出尽可能接近大模型的输出。</p>
+<p>这就叫知识蒸馏。大模型是 Teacher，小模型是 Student。不需要人类标注数据，大模型自己就是数据生成器。</p>
+<p>蒸馏出来的小模型在很多任务上可以达到大模型 80% 甚至 90% 的水平，但运行成本只有大模型的几十分之一。手机上跑的那些轻量级 AI 助手，几乎全是蒸馏出来的。</p>
+<p>蒸馏有一个很妙的副作用，小模型有时会比大模型更「干净」。因为大模型的知识来自庞杂的互联网数据，有些偏见和错误也被学进去了。当小模型只学大模型的输出而不接触原始数据时，这些噪音有可能会被过滤掉一部分。</p>
+<hr />
+<p>量化省的是存储。蒸馏省的是模型本身的大小。但还有一个东西没省。</p>
+<p>时间。</p>
+<p>训一个大模型要多久。GPT-3 175B，用 10000 张 V100 显卡，训了大概一个月。你只有一张 4090 的话，同一个模型你要训 800 多年，比你家族的历史还长。</p>
+<p>这就是为什么分布式训练不是一个选项，是一个必须。</p>
+<p>分布式训练分两种思路。数据并行，模型并行。</p>
+<p>数据并行最简单。你有 4 张显卡，把训练数据切成 4 份，每张卡吃一份。每张卡在自己的数据上算梯度，然后 4 张卡汇总梯度，更新参数。下一次迭代每张卡拿到同样的新参数，再从数据里拿下一份。周而复始。</p>
+<p>听起来很完美对吧。但问题在于，每张卡都要存一整套完整的模型参数。如果模型有 70 亿参数需要 28 GB，你 4 张卡就是每张都要 28 GB，数据并行的显存效率其实很低。它加速的是计算时间，不省显存。</p>
+<p>模型并行解决的就是这个问题。你的模型太大，一张卡放不下。那就把模型拆开。前 10 层 Transformer 放 GPU 0，中间 10 层放 GPU 1，后 10 层放 GPU 2。每张卡只存模型的一部分，数据从第一张卡流到最后一张卡，算完了再反向流回来。</p>
+<p>模型并行的效率不如数据并行，因为 GPU 之间要频繁通信，等待对方算完才能继续。但这几乎是训练千亿参数模型的唯一可行路径。</p>
+<p>实际训练大模型的时候，数据并行和模型并行通常混合使用，再加一个叫 ZeRO 的内存优化策略（第 19 课我们会聊到）。这是一个巨大的工程话题，但你现在只需要知道，训练一个大模型不只是「写代码然后跑」这么简单。它是一个涉及几十台服务器、几百张显卡、几公里的网线和能烧掉一个小城市电费的巨型工程。</p>
+<p>你看到那些说自己在家里训大模型的，99% 是在用 LoRA。</p>
+<hr />
+<p>说到这，我们顺带讲一句训练数据。</p>
+<p>「数据越多越好」这句话对不对。对，但也不全对。</p>
+<p>Chinchilla 论文（第 14 课会详聊）告诉我们，在给定的计算预算下，每增加一个参数，你就应该增加大约 20 个 Token 的训练数据。很多早期的大模型都「营养不良」，参数量很大但数据量不够匹配。</p>
+<p>除了数量，数据质量的重要性被严重低估了。用干净、高质量、多领域覆盖的数据训出来的小模型，常常比用掺杂了大量低质网页文本训出来的大模型表现更好。清洗数据这个活又脏又累还看不到直接的炫酷效果，但它是所有大模型训练里最被低估的一步。</p>
+<p>好了。量化是减肥，蒸馏是拜师学艺，分布式是叫人来帮忙搬砖。</p>
+<p>你现在知道大模型为什么烧钱了。</p>
+<p>别怕。你做微调的时候，用 LoRA 就行了。一张 4090 够用了。</p>
+<hr />
+<h2 id="追问模块面试官可能怎么问">追问模块：面试官可能怎么问</h2>
+<p><strong>追问 1：「INT8 和 INT4 量化后模型能力下降多少？」</strong></p>
+<p>FP16 几乎无损。INT8 在生成任务上感知不到差异，在数学推理上可能有 1-2% 的 benchmark 下降。INT4 的下降比较明显，特别是在需要精确数值计算的场景。但结合 QLoRA 训练，INT4 量化后的模型经过微调可以恢复到 FP16 的 95% 以上的水平。</p>
+<p><strong>追问 2：「蒸馏的 Student 模型有没有可能超过 Teacher？」</strong></p>
+<p>极少但确实发生过。当 Teacher 在特定任务上有盲区、而 Student 在训练时恰好通过其他方式（比如 Teacher 输出中的偶然变异）学到了更优的模式时，Student 可能在某些 benchmark 上反超。但总体来说，Teacher 决定了 Student 的天花板。</p>
+<p><strong>追问 3：「数据并行和模型并行各有什么坑？」</strong></p>
+<p>数据并行的坑在于通信瓶颈，所有卡算完之后要等梯度的 all-reduce，卡越多通信开销越大。模型并行的坑在于「流水线气泡」，GPU 之间互相等，算力利用率低。所以业界现在的主流是混合并行加 ZeRO 优化。</p>
+<p><strong>追问 4：「自己训模型，训练数据需要满足什么条件？」</strong></p>
+<p>干净、去重、多样化。至少要覆盖你目标领域的 10 倍以上的有效 Token 量。如果你的微调任务只需要几百条高质量标注数据就能做好，那就不要想着自己从零预训练，那是 OpenAI 和 Meta 的活。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>你有过「用更少的资源做到接近的效果」的经历吗？不管是工作、学习还是生活中的例子。跟量化和蒸馏的思路有什么相似和不同的地方？</p>
+</li>
+<li>
+<p>假如你只有一张 24GB 显存的 4090，你想微调一个 Llama 7B 模型。结合今天学的内容和之前讲的 LoRA，设计一个显存可行的方案，大致说一下每一步在干什么。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-4">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-6">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-6" class="lesson">
+  <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
+  <h1>第 6 课：Transformer 到底是什么</h1>
+<p>2017 年，八个 Google 研究员发了一篇论文。标题很嚣张，《Attention Is All You Need》。</p>
+<p>几年之后回头看，这篇论文确实没吹牛。它提出的 Transformer 架构，不仅取代了当时 NLP 领域的几乎一切技术，还成了现在你能看到的每一个大模型的骨架。GPT 是它。Claude 是它。Llama 是它。DeepSeek 也是它。</p>
+<p>所以 Transformer 到底是什么。</p>
+<p>先忘掉那些公式和术语。我换一种方式跟你说。</p>
+<p>想象你是一条高速公路的设计师。你需要设计一个收费站。但是你的收费站有一个非常特殊的要求，你面前的车辆序列可以同时被处理，不分先后。每辆车在路过的时候，不是只能跟前后相邻的两辆车对话，而是能跟路上所有的车同时对话。</p>
+<p>RNN（循环神经网络）就像只有一个收费窗口。车辆必须一辆一辆排着队过。第 100 辆车必须等前 99 辆都处理完了才能轮到自己。这导致两个问题。慢，而且远处的车辆信息传到后面时已经被压缩和扭曲了。</p>
+<p>Transformer 就像几十个收费窗口同时开放。所有车一起进，一起被处理。每辆车能同时看到路上所有其他车的位置和状态。效率暴增。</p>
+<p>Transfor 的设计非常对称。一个 Encoder 读输入，一个 Decoder 写输出。</p>
+<p>Encoder 的工作是「理解」。你把一句话扔给它，「猫追老鼠」。Encoder 把这句话里每个词的含义、以及词与词之间的关系都提取出来，打包成一个理解好的表示向量。它看的时候是双向的，「猫」和「追」的关系、「追」和「老鼠」的关系一起看。像你在同一瞬间看到了整句话的所有语法树。</p>
+<p>Decoder 的工作是「生成」。它拿着 Encoder 打包好的理解，一个字一个字地写出结果。比如把「猫追老鼠」翻译成英文，它就逐词生成「The cat chased the mouse」。写的时候它不能偷看后面还没写的词，这是规则。它只能基于已经写下的内容和 Encoder 传来的理解来决定下一个词是什么。</p>
+<p>这个结构在机器翻译任务上几乎是完美的。Encoder 理解源语言，Decoder 生成目标语言。</p>
+<p>但后来大家发现了一个更有意思的事。</p>
+<p>你把 Encoder 扔掉，只用 Decoder。给 Decoder 一大段文本，让它逐词续写。它续出来的东西不仅语法正确，还有逻辑，甚至有创意。</p>
+<p>GPT 就是这么来的。GPT 就是 Transformer 的 Decoder 部分。</p>
+<p>你把 Decoder 扔掉，只用 Encoder。让 Encoder 去理解一段文本，然后在这个理解的基础上做各种任务，分类、实体识别、问答。它能做到。</p>
+<p>BERT 就是这么来的。BERT 就是 Transformer 的 Encoder 部分。</p>
+<p>T5 两边都留着，继续做翻译和摘要。效果依然拔群。</p>
+<p>所以 Transformer 不是一个特定的模型。它是一套设计图纸。你用图纸里的「Encoder 模块」可以盖一座叫 BERT 的房子，用「Decoder 模块」可以盖一座叫 GPT 的房子，两套模块一起用可以盖一座叫 T5 的房子。</p>
+<p>共享的砖瓦只有四种。</p>
+<p>第一块砖。注意力机制。让每个词能跟所有其他词对话。整个 Transformer 最核心的发明。第 7 课我们会手写它的公式。</p>
+<p>第二块砖。残差连接。每一层的输出不是直接传给下一层，而是「本层的处理结果加上本层的原始输入」一起传下去。它修了一条让梯度直接回传的高速公路。第 10 课细讲。</p>
+<p>第三块砖。层归一化。每隔几层就统一一下数值范围，不让信号爆炸或消失。第 11 课聊它。</p>
+<p>第四块砖。位置编码。注意力机制对词序不敏感，把「猫追老鼠」打乱成「鼠追老猫」，注意力算出来的东西是一样的。所以需要额外注入位置信息。第 9 课拆解 RoPE。</p>
+<p>就这四种砖。Encoder 堆 6 层。Decoder 堆 6 层。加起来就是原版 Transformer。</p>
+<p>GPT-4 堆了几百层，但砖还是那四种砖。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「Transformer 相比 RNN 的最大优势是什么？」</strong></p>
+<p>并行计算。RNN 的每一步都依赖上一步的结果，训练时无法并行。Transformer 的注意力机制让所有位置同时计算，训练速度比 RNN 快几十倍到上百倍。</p>
+<p><strong>追问 2：「原版 Transformer 的 6 层是怎么定的？」</strong></p>
+<p>实验调的。作者试了不同层数，6 层在 WMT 翻译任务上性价比最高。不是理论推导出来的，是跑实验跑出来然后就这么固定下来的。后来的模型层数远超 6 层，残差连接让深层训练成为可能。</p>
+<p><strong>追问 3：「GPT 只用 Decoder，那它怎么理解输入的 Prompt？」</strong></p>
+<p>自注意力。Decoder 虽然不能看未来，但它可以看过去。你的 Prompt 就是「过去」。模型处理你的 Prompt 时，Prompt 里的每一个 token 都能看到它之前的所有 token。所以 Decoder 不需要 Encoder 也能理解上下文。它只是不能同时看过去和未来。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>用你自己的话，给一个完全不懂技术的朋友解释 Transformer 是什么。不许用「神经网络」「注意力」「并行」这些词。能找到三个生活中的类比吗。</p>
+</li>
+<li>
+<p>如果你是一家 AI 公司的 CTO，你会选 GPT（Decoder-Only）还是 BERT（Encoder-Only）还是 T5（Enc-Dec）来做一个新项目？为什么？试着想一想不同场景下的最优选择。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-5">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-7">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-7" class="lesson">
+  <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
+  <h1>第 7 课：Attention 公式，手写一遍就懂了</h1>
+<p>上一课说 Transformer 的核心是注意力。注意力是什么。</p>
+<p>先忘掉公式。想象一个场景。</p>
+<p>你走进一座巨型图书馆。你想找关于「如何烤面包」的资料。图书馆里有一百万本书，每本书的封面上写了标题和关键词。书里才是你要的内容。</p>
+<p>你会怎么做。</p>
+<p>你不会把一百万本书全翻一遍吧。你会怎么做。你会拿你的问题，「如何烤面包」，去跟每一本书的标题做匹配。标题里有「面包」「烘焙」「烤箱」这些词的书，你多分一些注意力。标题里是「宇宙起源」「Python 编程」「明朝历史」的，你少分注意力。然后你把所有书的内容，按你分配的注意力权重，做一个加权混合。</p>
+<p>这就是 Attention。</p>
+<p>只不过模型在千分之一秒内完成了这一百万次的匹配和混合。</p>
+<p>现在看公式。它就是图书馆流程的数学表达。</p>
+<p>Attention(Q, K, V) = softmax(Q × K^T / sqrt(d_k)) × V</p>
+<p>拆成四步。</p>
+<p>第一步。Q × K^T。</p>
+<p>Q 是你的「查询」，你在图书馆里找什么。K 是每本书的「标签」，这本书是关于什么的。Q 乘以 K 的转置，就是在计算你的问题和每本书标题的相似度。相似度越高，分数越高。</p>
+<p>在 Transformer 里，Q 和 K 都是从同一个输入向量投影出来的。每个词同时扮演「查询者」（Q）和「被查询标签」（K）两个角色。当你处理句子「猫坐在垫子上」的时候，位置「坐」的 Q 向量会去查询每个位置的 K 向量，发现「猫」和「垫子」跟它相关，「上」也相关但弱一些。</p>
+<p>结果是 n × n 的相关性矩阵。你知道为什么是 O(n²) 复杂度了。</p>
+<p>第二步。除以 sqrt(d_k)。</p>
+<p>为什么。因为 Q 和 K 的维度 d_k 可能很大（比如 64 或 128）。两个随机向量的点积期望值随维度增长。如果 d_k 很大，点积值就会很大。点积值太大送进 softmax 会出问题，softmax 会输出极端值，梯度消失。</p>
+<p>除以 sqrt(d_k) 就是把数值压回一个合理区间。原论文作者发现不除的话训练会发散。一个细节改变生死。</p>
+<p>第三步。softmax。</p>
+<p>softmax 做两件事。把分数变成概率，每一行的所有值加起来等于 1。并且 e^x 的特性会让高分更突出、低分更接近零，但不是零。</p>
+<p>这个「不是零」极其重要。即使两个词在 QK 空间里完全正交、点积为 0，softmax 给它的概率也不是 0。因为 e^0 = 1。所以每个词至少能分到一丁点注意力。</p>
+<p>这就是为什么「猫坐在垫子上」里，即使「猫」和「上」在语义上不太相关，「猫」仍然能分到「上」的一小点注意力。</p>
+<p>第四步。× V。</p>
+<p>V 是书的「内容」，这本书到底说了什么。Attention 的最终输出就是把 V 矩阵里的每一行，按照 softmax 算出来的注意力权重，做加权求和。</p>
+<p>处理「坐」这个词的时候，V_坐 × 0.5 + V_猫 × 0.3 + V_垫子 × 0.15 + V_上 × 0.05。结果就是这个位置的最终表示。</p>
+<p>它不是「坐」的原始含义。它是「坐」融入了「猫」和「垫子」之后的新含义。</p>
+<p>上下文。就是这么产生的。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「Q 和 K 为什么不能用同一个矩阵？」</strong></p>
+<p>如果用同一个矩阵，QK^T 就变成了 K 跟自己的对称积。对称矩阵意味着注意力也是对称的，token A 对 token B 的关注度和 B 对 A 一模一样。但语言不是对称的。「猫」对「坐」的关注，和「坐」对「猫」的关注，是不一样的。分开 Q 和 K 给了模型不对称的表达能力。</p>
+<p><strong>追问 2：「为什么要除以 sqrt(d_k) 而不是 sqrt(d_model) 或者别的？」</strong></p>
+<p>因为每头注意力的维度是 d_k，点积的方差跟 d_k 成正比。除以 sqrt(d_k) 恰好让点积的方差等于 1，保证 softmax 的输入在稳定区间。这是一个方差归一化的操作。</p>
+<p><strong>追问 3：「你能手写一个极简版 Attention 的 PyTorch 代码吗？」</strong></p>
+<pre class="highlight"><code class="language-python">import torch
+import torch.nn.functional as F
+
+def attention(Q, K, V):
+    d_k = Q.size(-1)
+    scores = Q @ K.transpose(-2, -1) / torch.sqrt(torch.tensor(d_k))
+    weights = F.softmax(scores, dim=-1)
+    return weights @ V
+</code></pre>
+
+<p>就四行。整个现代 AI 世界的基石就这四行。</p>
+<p><strong>追问 4：「Seq_len 128K 的时候 n² 是多少？怎么解决？」</strong></p>
+<p>大约 160 亿次运算。解决方案是 FlashAttention，不在 HBM 里存完整的 n×n 矩阵，分块计算，用 online softmax 保证数值正确。第 21 课会详细讲它。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>用图书馆的比喻，给一个完全不懂的朋友讲一遍 Attention 的四步。看看他能不能复述出来。如果复述不了，你的比喻哪里还不够直观。</p>
+</li>
+<li>
+<p>如果 Q、K、V 全部设为相同矩阵会怎样。回到那个 Attention 四行代码，想想会出什么问题。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-6">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-8">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-8" class="lesson">
+  <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
+  <h1>第 8 课：多头注意力，为什么一个头不够</h1>
+<p>上节课你学会了怎么算一个 Attention 头。</p>
+<p>但 Transformer 从来不会只用一头。原版论文用了 8 个。为什么。</p>
+<p>因为你一个头只能看到一种关系。而语言里同时存在几十种关系，主谓、动宾、介宾、指代、并列、转折。全揉进一个 Attention 矩阵里，结果就是模糊。什么都有一点，什么都没看清楚。</p>
+<p>这就好像你请一个人来评鉴一桌菜。他说这道菜有点咸，那道还行，总体不错。有用吗。有用，但不够。</p>
+<p>如果你请 8 个评委，每个人的味觉专门训练过不同类型，鲜味、火候、摆盘、食材搭配，各有所长。然后汇总 8 份品鉴报告。你会发现每份报告各有侧重，拼在一起就是一张完整的味觉地图。</p>
+<p>这就是多头的逻辑。不是把一件事做 8 遍。是让 8 个专家各盯着一个维度看。</p>
+<p>做法很简单。把原来一个 512 维的 Q、K、V 矩阵，切成 8 个 64 维的小矩阵。每个小矩阵独立计算 Attention。8 个结果拼回去，再过一遍线性变换 W_o。齐活。</p>
+<p>8 个低维头的计算总量跟 1 个高维头几乎一样。但效果完全不同。</p>
+<p>因为维度降了，每个头被迫聚焦。一个头在 512 维空间里可以关注一切，它也确实试图关注一切，结果什么都平均了。一个头在 64 维空间里只有这么多信息容量，它必须有所取舍。它会在训练中自然演化出一种「专长」，有的头学主谓一致，有的头学指代关系，有的头盯着相邻词之间的局部模式。</p>
+<p>这块需要注意一下，这些专长不是人为指定的。没有人告诉头 1 你去学主谓关系。这些专长是在训练中自己涌现出来的。每个头的 W_Q、W_K、W_V 在训练中收到不同的梯度信号，各走各的路，最终演化出不同的关注模式。</p>
+<p>那我问你。如果用 1 个头但加大 d_k 到 512，能行吗。</p>
+<p>这是个经典面试追问。答案是不好使。</p>
+<p>因为 1 个头的 512 维 QK^T 结果是一个标量。无论你的 Q 和 K 有多少维，它们的相似度最终只用一个数字表达。这个数字就是所有 512 个维度的信息的「平均」。一个数字没法同时描述主谓关系、指代关系、词序关系和语义关系，它只能给所有这些关系算出唯一的平均分。</p>
+<p>8 个头给出 8 个标量。每个标量分别描述一种关系。信息量多 8 倍。</p>
+<p>这就是为什么 8 个 64 维的头远好于 1 个 512 维的头。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「每个头真的会自然地演化出不同的专长吗？有什么证据？」</strong></p>
+<p>有大量可视化研究证明了这一点。把每个头的注意力矩阵画出来，你会发现不同头的注意力模式截然不同，有的集中在对角线附近，有的集中在特定的远距离词对之间，有的几乎均匀分布。这就是专长的直接证据。</p>
+<p><strong>追问 2：「头越多越好吗？为什么不是 16 个、32 个？」</strong></p>
+<p>头数增加会降低 d_k（总维度不变），每个头的维度过小会影响注意力质量。而且头数到一定数量之后边际收益骤降。实验表明 8 到 16 个头的效果差不多。更多头还会增加计算开销。所以现代大模型一般在 32 到 128 之间选，看总维度。</p>
+<p><strong>追问 3：「有没有没用的头，能不能裁掉？」</strong></p>
+<p>有。有些头在训练后会变成「废头」，它们的注意力分布几乎是均匀的，说明没有学到任何特殊模式。这些头可以裁掉而不影响模型性能。这就是头剪枝的研究方向。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>你用上节课的 Attention 四行代码，改一下让它支持 Multi-Head。大致的伪代码结构就行。</p>
+</li>
+<li>
+<p>如果让你设计一个 4 头注意力，你能给每个头指定一个「理想中希望它学的模式」吗。你会指定哪四种。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-7">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-9">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-9" class="lesson">
+  <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
+  <h1>第 9 课：位置编码，模型怎么知道词顺序</h1>
+<p>上节课末尾我提了一句。注意力是排列不敏感的。把「猫追老鼠」的 token 顺序随机打乱，Attention 算出来的结果一模一样。</p>
+<p>这不是 bug。这是 QK^T 矩阵乘法的数学特性。矩阵乘法不关心你行和行的排列顺序。换一下行的位置，点积值该是多少还是多少。</p>
+<p>那问题来了。语言是严重依赖顺序的。「猫追老鼠」和「老鼠追猫」是完全相反的意思。你必须给模型注入位置信息。</p>
+<p>三种做法。绝对位置编码，相对位置编码，RoPE。</p>
+<p>绝对位置编码最直白。给每个位置分配一个固定的数字向量，位置 1 一个向量，位置 2 一个向量，以此类推。然后把这个向量直接加到 token embedding 上。模型在训练过程中学会了「哦，这个向量加到 embedding 上，说明这个词在第三个位置」。</p>
+<p>原版 Transformer 用的就是这个。用 sin 和 cos 做位置编码，不同的维度频率不同，低频捕捉远距离关系，高频捕捉近距离关系。</p>
+<p>但绝对位置编码有一个致命问题。你训练时最大序列长度 512，推理时给了一个 1024 长度的句子。位置 1024 的 sin/cos 编码是模型从来没见过的。它就懵了。</p>
+<p>这就叫外推能力差。</p>
+<p>相对位置编码解决这个问题。它不关心你在第几位，关心的是你跟我要离多远。我在你的前三个位置，离你远的就是我们的距离。距离是平移不变的，距离 10 就是 10，跟你的起始位置是 5 还是 100 都无关。</p>
+<p>做起来就是学习一个「距离→偏置」的映射表。距离为 1，偏置是多少。距离为 2，偏置是多少。以此类推。这些偏置直接作用在 Attention 分数上，不用再加到 embedding 上了。</p>
+<p>相对位置编码的外推比绝对强一些。但也不完美。因为你学到的偏置表有一个最大距离限制，超出这个距离的偏置全被截断到同一个值。</p>
+<p>RoPE 是当前的最优解。Llama 用它。Qwen 用它。DeepSeek 用它。</p>
+<p>RoPE 的想法极其优雅。不给位置分配固定向量。而是把位置信息编成旋转角度。</p>
+<p>你把 Q 和 K 向量里的每两个相邻维度看作一个 2D 平面上的箭头。对于位置 m，把这个箭头顺时针转 m × θ 度。每个 2D 对的旋转频率 θ 不同，高频对转得快，捕捉局部位置关系。低频对转得慢，捕捉全局位置信息。</p>
+<p>旋转后的 Q_m 和 K_n 做点积。因为旋转矩阵有一个群性质，两个旋转的内积只跟角度差有关，不跟绝对值有关。</p>
+<p>Q_m · K_n = (R_m q) · (R_n k) = q · (R_{n-m} k)</p>
+<p>只依赖 n-m。也就是你我的相对位置。</p>
+<p>RoPE 同时拥有绝对位置的外推能力和相对位置的位置差信息，却不依赖绝对位置的唯一性。它把位置信息通过乘法融进了 Q 和 K 自己，不需要额外参数。任何一个新长度对它来说都只是转了一个稍大一点的角度。</p>
+<p>这大概是我见过的最漂亮的位置编码设计。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「RoPE 能外推到多长？」</strong></p>
+<p>原生 RoPE 在 2x 训练长度范围内表现稳定。配合 NTK-aware scaling 等技术，可以推到 8x 甚至更长。核心思路是调整高频维度的旋转频率，让长序列上的旋转角度变化更平滑。</p>
+<p><strong>追问 2：「为什么绝对位置编码用 sin/cos 而不用可学习的参数？」</strong></p>
+<p>可以学习，而且很多模型确实这么做了。但 sin/cos 有一个理论优势，它天然满足相对位置的性质。不同位置的 sin/cos 编码有确定的关系，模型可以从中推导出距离信息。纯学习的参数没有这个属性。不过在实践中，可学习的位置编码在很多任务上表现得也不错。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>如果完全没有位置编码，让模型自己从注意力模式中推断位置关系，你觉得能行吗。试着分析为什么可能行或者为什么不可能行。</p>
+</li>
+<li>
+<p>RoPE 的设计者为什么选择旋转而不是平移或缩放。这三种变换方式在表达位置时有什么根本区别。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-8">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-10">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-10" class="lesson">
+  <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
+  <h1>第 10 课：残差连接，梯度的高速公路</h1>
+<p>你玩过传话游戏吗。</p>
+<p>十个人排成一排。第一个人拿到一张写着一句话的纸条。看完后背给第二个人。第二个人背给第三个人。传到第十个人的时候，那句话已经跟原话毫无关系了。</p>
+<p>这就是深层神经网络没有残差连接时的处境。</p>
+<p>每一层都是一个「传话人」。输入经过 Attention 或 FFN 处理，输出传给下一层。每一层都可能引入一点误差，数值范围的偏移、信息的丢失、细微的扭曲。一层的问题不大，十层还凑合。一百层之后，第一层的原始信息已经面目全非。</p>
+<p>更致命的是梯度。反向传播时梯度要从最后一层一层层传回第一层。每传一层都要乘一个导数。绝大多数激活函数的导数在 [0, 1] 之间，大多小于 1。100 层累乘下来，梯度变成了一个接近于零的数字。</p>
+<p>第一层收不到有效的更新信号。学不动。</p>
+<p>残差连接的想法极其简单。在每一层的输出上，加上这一层的原始输入。</p>
+<p>y = x + F(x)</p>
+<p>x 是输入。F(x) 是本层处理后的结果。y 是输出。</p>
+<p>多出来一条路。x 不走任何处理，直接跳到了加法节点。</p>
+<p>反向传播的时候。dy/dx = I + dF/dx。I 是单位矩阵。即使 dF/dx 很小、接近零，梯度至少还剩一个 I，原封不动传回去。</p>
+<p>一条高速公路。不收费，不限速，梯度从最后一层直达第一层。</p>
+<p>Transformer 的每一层有两个残差连接。Attention 后加一个。FFN 后加一个。x 同时在两条高速路上跑，永远不会衰减。</p>
+<p>这就是为什么 Transformer 可以堆 100 层甚至更多。没有残差连接的深层网络，别说 100 层，12 层都训不动。</p>
+<p>ResNet（残差网络）2015 年由何恺明提出时，主要是给图像领域用的。当时最大的突破就是把 152 层残差网络训出来了，同时期的非残差网络连 30 层都够呛。2017 年 Transformer 借了残差连接，从此 LLM 的深度不再是一个工程瓶颈。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「残差连接会不会让 x 的原始信息过度保留，影响模型学习新特征？」</strong></p>
+<p>会有这个风险。如果 F(x) 输出很小，y ≈ x。这层就像没加一样，学不到新东西。所以 LayerNorm 通常放在残差之前（Pre-norm），先归一化，再让 F(x) 在稳定的数值范围内学习。下一课我们会展开讲 Pre-norm 和 Post-norm 的区别。</p>
+<p><strong>追问 2：「残差连接和 Highway Network 有什么区别？」</strong></p>
+<p>Highway Network 是残差连接的前身，用一个门控机制决定 x 和 F(x) 各占多大比例，参数更多。残差连接直接加，简单粗暴效果好。事实证明不需要那个门，直接加就够了。</p>
+<p><strong>追问 3：「为什么残差连接能解决梯度消失而不能解决梯度爆炸？」</strong></p>
+<p>因为它保证的是梯度至少有 1，不会变小。但对梯度变大没有约束，如果 dF/dx 很大，I + dF/dx 可能远大于 1。所以仍然需要梯度裁剪。残差连接保下限不保上限。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>用传话游戏的类比，设想一种「每个传话人拿到的纸条上既写了自己的理解、也附上了原话」的规则。这和残差连接在机制上有哪些相似和不同。</p>
+</li>
+<li>
+<p>如果你设计一个没有残差连接但有 100 层的 Transformer，你还能想到别的办法让深层网络可训练吗。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-9">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-11">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-11" class="lesson">
+  <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
+  <h1>第 11 课：LayerNorm，BN 在图像界称王，NLP 为什么不行</h1>
+<p>残差连接解决了梯度消失。但这没解决另一个问题。</p>
+<p>层与层之间的「语言不通」。</p>
+<p>Transformer 每层的输出，数值范围可能完全不一样。第一层 Attention 输出的数值集中在 [-2, 2]，第二层 FFN 输出可能变成了 [-50, 50]，第三层又变成 [-0.01, 0.01]。下一层接到上层的输入后，没法稳定地学习，输入分布一直在变。</p>
+<p>这就叫内部协变量偏移。</p>
+<p>归一化做的事就是把每层的输入拉到一个标准分布上，均值 ≈0，标准差 ≈1。像翻译官，每层过来不管说什么语言都先翻译成普通话。</p>
+<p>公式都一样。y = γ × (x - μ) / σ + β。减均值，除标准差，再乘一个可学习的缩放因子 γ 加上一个可学习的平移因子 β。</p>
+<p>但 μ 和 σ 从哪算。这就是 LayerNorm 和 BatchNorm 唯一的区别。</p>
+<p>想象数据是一张三维表格。维度一是 batch（一共几份样本），维度二是序列长度（每份样本有几个 token），维度三是特征维度（每个 token 用多少维向量表示）。</p>
+<p>BatchNorm 的操作是固定特征维度，跨所有样本和所有序列位置去算 μ 和 σ。特征 1 的均值是这一批全部样本、全部位置的数值平均。</p>
+<p>LayerNorm 的操作是固定一个样本的一个位置，在这个位置的特征维度上去算 μ 和 σ。Token「猫」的均值是它自己那 512 维向量的平均值。</p>
+<p>看出来区别了吗。</p>
+<p>BatchNorm 跨样本。LayerNorm 不跨样本。</p>
+<p>在 CV 里 BatchNorm 是王者。一张图片 224×224 的像素，batch=128，一个特征在所有 128×224×224 个位置上算均值。样本量巨大，统计稳定。</p>
+<p>在 NLP 里 BatchNorm 基本上不能用。句子不等长，有 PAD 填充位，PAD 的嵌入是随机向量，混进均值计算会污染结果。而且 NLP 的 batch size 往往很小，一个长句可能就占满了一张 GPU 的显存。batch size 小的时候 BatchNorm 的统计量极不稳定。</p>
+<p>LayerNorm 不存在这些问题。它不跨样本，每个位置独立归一化。PAD 位置不影响任何真实 Token 的统计量。batch size=1 也正常工作。训练和推理的数学过程完全一致。</p>
+<p>这就是 Transformer 只认 LayerNorm 的原因。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「LayerNorm 为什么还要学 γ 和 β？不是已经归一化到标准分布了吗？」</strong></p>
+<p>自由度的保留。把所有输入严格控制到均值 0、方差 1，会丢掉数值幅值里包含的有用信息。γ 和 β 给了模型一个「掰回去」的空间。在训练中 γ 不会停留 1，β 不会停留 0，说明模型确实需要这个自由度。</p>
+<p><strong>追问 2：「有没有比 LayerNorm 更好的归一化方法？」</strong></p>
+<p>RMSNorm 是目前很多模型的替代。它只做方差归一化不调均值，省掉了均值计算这一步。在 Transformer 里表现跟 LayerNorm 持平但更快。Llama、DeepSeek 这些模型已经切到了 RMSNorm。不是更好或更差，是更简单但效果持平。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>CV 用 BN，NLP 用 LN。那多模态模型（同时处理图片和文本）应该用什么。试分析。</p>
+</li>
+<li>
+<p>如果 batch size 可以任意大（比如无限 GPU），NLP 是否也能用好 BatchNorm。除了 PAD，还有别的因素阻挡吗。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-10">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-12">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-12" class="lesson">
+  <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
+  <h1>第 12 课：Pre-norm vs Post-norm，安检放哪的问题</h1>
+<p>想象你是一个机场的设计师。</p>
+<p>你的机场每天要处理一百万乘客。你需要安检。安检有两个候选位置。放登机口门口，乘客到了先进安检再过闸口。放通道上，乘客过完闸口进通道，出通道前再过安检。</p>
+<p>你会选哪个。</p>
+<p>好像差别不大对吧。那我告诉你安检站会吃掉一部分行李。后一种方案中，每一位乘客的行李被安检站拆开检查后又重新打包一层，包了一层又一层的保鲜膜。100 层之后那箱东西已经不像原来的样子了。</p>
+<p>前一种方案中。每个人都先把自己的行李换成一个标准箱子，过完闸和通道之后再拿回来。行李重量在全程中始终可控。</p>
+<p>这就是 Pre-norm 和 Post-norm 的直觉对比。</p>
+<p>先说两个公式。</p>
+<p>Post-norm: y = LayerNorm(x + F(x))
+Pre-norm: y = x + F(LayerNorm(x))</p>
+<p>区别在哪。LayerNorm 放加号前面还是后面。</p>
+<p>Post-norm 是原论文的设计。x 和处理后的 F(x) 相加，加完之后再过 LayerNorm。这个「加完之后再过」就是问题。因为残差连接的另一条路，也就是 x 直接跳过来的那条，跟 x + F(x) 一起被送进了 LayerNorm。</p>
+<p>LayerNorm 里有除以标准差的操作。梯度回传时要经过这一除。标准差小时梯度被放大，标准差大时梯度被压缩。训练初期网络不稳定，标准差上蹿下跳，梯度也跟着坐过山车。很容易训崩。</p>
+<p>解决办法叫 Warmup。前几千步用极小的学习率，等网络内部稳定了再放开正常学习率。Warmup 确实能解决问题，但它本身是个需要调参的超参数，warmup 步数设错了照样崩。</p>
+<p>Pre-norm 把 LayerNorm 挪到了 F(x) 前面。残差连接的平滑通道绕过了整个 F(LayerNorm(x)) 块，直达输出。梯度走这条路不经过任何运算，原封不动回去。</p>
+<p>dy/dx = I + dF(LN(x))/dx。I 在那里，梯度保底。</p>
+<p>Pre-norm 省掉了 Warmup。训练从第一步就能用正常学习率。极致简单，极度稳定。所有现代大模型，GPT、Llama、Qwen、DeepSeek，全部用 Pre-norm。</p>
+<p>代价极小。Pre-norm 有微弱的表达能力损失，每层输入都被强制归一化，削弱了幅值信息的传播。但在千亿参数面前，那点损失完全算不上事。</p>
+<p>Post-norm 呢。已被历史淘汰。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「Pre-norm 有没有升级版？」</strong></p>
+<p>Sandwich-LN 在注意力前后各放一个 LayerNorm，相当于双保险。DeepNorm 针对超深层网络（100+ 层）做了专门的初始化调整。这些是 Pre-norm 的变体，但方向跟 Pre-norm 一致，让 LayerNorm 在残差里面还是在外面这条界线上，大家已经站队了。</p>
+<p><strong>追问 2：「Pre-norm 和 Post-norm 有正式的理论分析吗？」</strong></p>
+<p>2020 年有一篇论文从梯度范数的角度分析了这个问题。Pre-norm 的梯度范数在初始化时就稳定在合理范围，Post-norm 的梯度范数随深度指数增长。理论跟实验结果一致。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>用一个现实中安检排队的场景，解释为什么「先在入口安检」比「出通道再安检」让整体更高效。这和 Pre-norm 的逻辑有什么相通之处。</p>
+</li>
+<li>
+<p>如果你有无限的时间和算力，Post-norm 配 Warmup 能不能追平 Pre-norm。如果能，为什么 2026 年所有模型还都选 Pre-norm。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-11">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-13">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-13" class="lesson">
+  <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
+  <h1>第 13 课：两种 Mask，为什么模型必须戴眼镜</h1>
+<p>你拿到一张卷子。上面印着十道题。最后两行是阅卷官的批注草稿，上面乱涂了一堆数字，毫无意义。</p>
+<p>你会去看那两行吗。你不会。你看的那几秒就是你注意力被浪费的几秒。</p>
+<p>现在想象你是一个正在考试的学生。你做到第五题。正确答案就在旁边的试卷背面印着呢。不遮住的话你会不会偷看。你肯定会被诱惑，你的注意力不可避免地被那些不该看的答案分走。</p>
+<p>这就是 Transformer 需要的两种 Mask。</p>
+<p>Padding Mask 遮住的是那些无意义的填充位。</p>
+<p>训练的时候一个 batch 里句子不等长。「我爱 NLP」只有三个 token，「你今天过得怎么样」有七个 token。要组成一个整齐的矩阵，短的句子就得补上 PAD 填充符。这些 PAD 位在 embedding 层是随机向量，不包含任何语义信息。</p>
+<p>如果不加 Padding Mask，真实 token 的注意力会被 PAD 分走一部分。Softmax 的和是 1，分给 PAD 的权重就是抢了真实 token 的注意力预算。PAD 位也参与 Loss 计算，模型会试图预测 PAD 的下一个词，产生无效的梯度更新。</p>
+<p>所以 Padding Mask 在注意力矩阵里把 PAD 对应的行和列设为可屏蔽状态。这些位置的数值被替换成负无穷大。过 Softmax 后 e^{-∞}=0，权重归零。彻底从计算中消失。</p>
+<p>Encoder 需要。Decoder 也需要。PAD 不是语义，无论谁都不能看它。</p>
+<p>Sequence Mask 遮住的是未来。</p>
+<p>Decoder 训练时用的是 Teacher Forcing，把完整的正确答案一次性喂进去，但有因果限制。训练时处理第三个 token，模型理论上可以看到第四、第五、第六个 token，这些都是未来的信息。但推理时你看不到未来。如果训练时让模型依赖未来的信息，推理时它会因为看不到未来而崩溃。</p>
+<p>这种训练和推理的输入不一致叫曝光偏差。</p>
+<p>Sequence Mask 就是一个下三角矩阵。对角线及以下保留，过去和自己可见。对角线以上全部屏蔽，未来不可见。跟 Padding Mask 一样的实现，需要屏蔽的位置设为负无穷，Softmax 后归零。</p>
+<p>Decoder 里的每一个 Self-Attention 层都戴着这块下三角眼镜。</p>
+<p>Encoder 不需要。因为 Encoder 是双向理解，它可以同时看见过去和未来。这也是为什么 Encoder 适合理解任务，给它整句话，它能同时看到前后文。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「为什么掩码值是负无穷而不是 0？」</strong></p>
+<p>e^0 = 1。如果用 0，被屏蔽的 token 仍然会分到权重，softmax 后占比大概是 1/(e²+e¹+e^0+e^{-1}+...)。只有 e^{-∞}=0，才能让权重精确为零。实践中用 -1e9 或 float('-inf')。</p>
+<p><strong>追问 2：「Sequence Mask 在推理时也起作用吗？」</strong></p>
+<p>必须起作用。推理是自回归的，一次生成一个 token，已有序列逐位增长。每生成一个新 token，它可以看到前面所有已生成的 token，但不能看到还没生成的。Mask 随着序列长度动态扩大，训练时 Mask 是正方形的，推理时 Mask 是正方形的但每次尺寸都在变。</p>
+<p><strong>追问 3：「Encoder 有没有 Sequence Mask？」</strong></p>
+<p>没有。Encoder 是双向注意力。它需要的是同时看到前后的完整信息来「理解」这句话。这也是为什么你问 BERT「今天天气怎么样」时，它不需要从左到右逐字读，它一眼看了整句。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>想象你正在设计一个新的 Attention 变体，能不能设计一种 Mask，既保留双向理解的能力，又不让模型依赖未来？如果有这种 Mask，会是什么样。</p>
+</li>
+<li>
+<p>如果你参与设计了一个大学阶段的论文批改 AI，训练时需要同时用到 Padding Mask 和 Sequence Mask 吗？试分析这个场景下的数据特征。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-12">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-14">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-14" class="lesson">
+  <div class="lesson-part-label">第三部分：炼金 —— 模型是怎么训出来的</div>
+  <h1>第 14 课：参数 vs 数据，容器和内容</h1>
+<p>你第一次看到 GPT-3 有 1750 亿参数的时候，第一反应大概跟我一样。</p>
+<p>好多。</p>
+<p>但参数多就厉害吗。我给你看一个反直觉的事实。</p>
+<p>2022 年 Google 的 DeepMind 训了一个叫 Chinchilla 的模型。它只有 700 亿参数，比 GPT-3 小了将近两倍半。但它在各种 benchmark 上的表现全面超过了 GPT-3。同时训练成本还更低。</p>
+<p>为什么。</p>
+<p>因为 GPT-3 的参数量很大，但它吃进去的数据量跟参数完全不匹配。就像一个 2 米高的篮球运动员，一天只吃一顿饭，再高的个子跑几步就喘。</p>
+<p>参数量是模型的容量。它决定了模型能学多复杂的模式、能记住多少信息。就像一个仓库，面积越大能堆的货越多。</p>
+<p>数据量是模型的营养。它决定了模型有没有足够的材料来填充这个容量。就像往仓库里搬运的货，仓库再大，没货运也白搭。</p>
+<p>参数本身是不包含任何知识的。训练刚开始的时候，所有参数都是随机数。随机数是知识吗？不是。是噪音。</p>
+<p>数据才是知识的载体。模型每读一个 Token，就通过反向传播把知识「写」进参数里一点。读的 Token 越多，写入的知识越丰富、越准确。</p>
+<p>所以你只有 1750 亿参数的容量，但只给它读了 3000 亿个 Token，相当于一个 1750 亿的仓库只装了三趟卡车的货。仓库大部分空间空着。大量的参数容量被浪费了。这就是 GPT-3 的问题。</p>
+<p>Chinchilla 用 700 亿参数读了 1.4 万亿 Token。参数不大但数据充足。仓库虽小，但堆满了货。结果表现反而更好。</p>
+<p>Chinchilla 论文给出了一个经验公式。在给定计算预算 C 的前提下，最优的参数和数据的比例大概是 D ≈ 20 × N。每 1 个参数，需要喂约 20 个 Token 的训练数据。</p>
+<p>这是 Scaling Law 最核心的工程洞见。做模型不是只堆参数就行。你没有对应的数据量，模型就是饿着肚子在做推理。别老想着在参数上跟人卷，先把数据量配到位。</p>
+<p>后来的 Llama 其实用了远超 Chinchilla 比例的数据，因为数据质量高了之后可以多轮重复使用，不完全遵守 Chinchilla 的「只训一轮」假设。但 Chinchilla 的原则仍然成立。数据和参数要匹配增长，不能一头大。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「参数大但数据少的模型，还能不能抢救？」</strong></p>
+<p>能。继续喂数据继续训。但需要更多算力和时间。而且这不一定划算，同样的算力如果从一开始就合理分配参数和数据，效果会更好。补救的性价比低于一开始就按比例分配。</p>
+<p><strong>追问 2：「Llama 3 为什么用了远超 Chinchilla 比例的数据？」</strong></p>
+<p>Chinchilla 的结论建立在「只训一个 epoch」的假设上。但高质量数据可以多 epoch 训练，每多训练一轮，模型还能从数据里继续学到东西。Llama 3 的数据质量极高，所以多 epoch 训练仍然有效。这也是为什么现在的训练范式不完全拘泥于 Chinchilla 公式，它仍然是一个好起点，但不是金科玉律。</p>
+<p><strong>追问 3：「参数和数据之间有没有硬上限？」</strong></p>
+<p>理论上有。参数的上限是过拟合，模型大到能背住所有训练数据时就没用了。数据的上限是自然语言的固有熵，语言的随机性本身设定了 Loss 的理论下限 L∞，这个屏障是不可约的。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>用生活中的例子解释参数是容量、数据是内容。你见过哪些「容量很大但内容贫乏」和「容量不大但内容充实」的情况。</p>
+</li>
+<li>
+<p>如果你只有 100 万预算训练一个模型，你会选择更大的参数还是更多的数据。列出你的决策理由。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-13">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-15">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-15" class="lesson">
+  <div class="lesson-part-label">第三部分：炼金 —— 模型是怎么训出来的</div>
+  <h1>第 15 课：MLM vs CLM，两种截然不同的教法</h1>
+<p>你见过完形填空和续写故事的区别吗。</p>
+<p>完形填空是给你一句话，中间挖掉几个词，让你根据前后文来填。你能同时看到前后的信息。续写故事是给你一个开头，后面的空白全凭你从已有的部分推测。</p>
+<p>完形填空就是 MLM，Masked Language Model，BERT 的训练方式。续写故事就是 CLM，Causal Language Model，GPT 的训练方式。</p>
+<p>一个是双向理解。一个是单向生成。教法不同，决定了模型能干什么不能干什么。</p>
+<p>MLM 的训练过程是这样的。随机遮住句子中 15% 的词。比如「今天天气真不错，适合出去散步」，可能遮成「今天 [MASK] 真不错，适合 [MASK] 散步」。然后把遮完的句子喂给模型，让模型猜被遮住的词是什么。正确答案是「天气」和「出去」。猜错了反向传播调参数。</p>
+<p>MLM 的厉害之处在于模型被迫理解上下文。要猜出被遮住的「天气」，它必须同时看到前面的「今天」和后面的「真不错」，只凭前面三个词是猜不出来的。这迫使模型建立双向的语言理解能力。</p>
+<p>但 MLM 有明显的局限性。训练时只有 15% 的 Token 产生学习信号，就是那些被遮住的词。剩下的 85% 只是「提供上下文」。信息利用率很低。而且推理时根本没有 [MASK]，你给我一段文字让我做分类，文字里没有遮住的词，模型在训练时学到的「看到 [MASK] 就填」的技巧根本用不上。</p>
+<p>CLM 的训练方式完全不同。没有遮词。连续预测下一个 Token。「今天天气真」→ 预测「不」。「今天天气真不」→ 预测「错」。每一个 Token 都是学习信号，信息利用率 100%。</p>
+<p>而且训练和推理完全一致，都是预测下一个词。没有 MASK，没有 mismatch。CLM 天然就适合生成文本，它存在的唯一目的就是「续写」。</p>
+<p>但 CLM 的注意力是单向的。它在生成「错」的时候只能看到「今天天气真不错」，未来的「，适合出去散步」这些词对它来说是黑箱。它无法像 MLM 那样同时利用前后信息。</p>
+<p>所以你的选择很简单。如果你的任务是理解，分类、命名实体识别、语义匹配，MLM 是更好的训练方式。BERT 就是这么训出来的。如果你的任务是生成，对话、翻译、续写，CLM 是更好的训练方式。GPT 就是这么训出来的。</p>
+<p>现代 LLM 几乎全用 CLM。不是因为 CLM 在理解任务上强，而是因为 CLM 在生成任务上天然更强，而生成是 LLM 的核心价值。LLM 首先是「能写的 AI」，其次才是「能读懂文章的 AI」。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「BERT 的 MLM 能不能用来做生成？」</strong></p>
+<p>勉强能。你可以把 BERT 当成一个编解码生成器，随机挡一些 Token，让它填。但每次只能填少数几个位置，无法像 GPT 那样一口气生成一篇长文。BERT 的设计就不为生成而生。</p>
+<p><strong>追问 2：「为什么没有人把 MLM 和 CLM 混在一起训练一个更全能的模型？」</strong></p>
+<p>有。T5 就是这么做的，用 Span Corruption，遮住一整段连续的文本让模型还原。兼具 MLM 的双向理解能力和 CLM 的自回归生成能力。但因为架构复杂度更高（Enc-Dec），训练和推理成本都比 Decoder-Only 大，最终没有成为主流。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>用你自己学一门技能的经验来类比 MLM 和 CLM。你更习惯于哪种学习方式。</p>
+</li>
+<li>
+<p>如果一个模型同时训了 MLM 和 CLM，它在推理时应该以哪种模式运行。这两种模式能在同一个模型中共存吗。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-14">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-16">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-16" class="lesson">
+  <div class="lesson-part-label">第三部分：炼金 —— 模型是怎么训出来的</div>
+  <h1>第 16 课：RLHF 全流程，SFT → RM → PPO</h1>
+<p>第四课我们用脱口秀彩排讲了一遍 RLHF 的全貌。现在是拆开工程细节的时候了。</p>
+<p>第一步。SFT。Supervised Fine-Tuning。</p>
+<p>给你一堆高质量的人类标注数据。每条数据是一个 prompt 和一个被人类认为「完美」的回答。你要让模型的输出尽可能接近这些完美回答。怎么做。标准的交叉熵损失训练。跟预训练一模一样，只是数据的质量和方向性完全变了。预训练的语料是全网文本。SFT 的语料是几千到几万条人类精心编写的示例。</p>
+<p>SFT 完了之后模型已经能说出像样的话了。但它的回答风格是「模仿人类标注员的平均水平」。标注员说什么风格的话，模型就学什么风格的话。这还不够。</p>
+<p>你需要一个自动化的质量判断机制。这就是 RM。</p>
+<p>第二步。RM。Reward Model。</p>
+<p>RM 是一个独立训练的小模型。给一段 prompt 和一个 response，输出一个分数，这个回答有多好。RM 的训练数据怎么来。给同一个 prompt，让 SFT 模型生成好几个不同的回答（比如 4 个）。人类标注员对这 4 个回答排序，A 比 B 好，B 跟 C 差不多，C 比 D 好。RM 的损失函数叫 pairwise ranking loss，让模型学会输出一个标量奖励 r，使得人类喜欢的回答的 r 更高。</p>
+<p>为什么要排序而不是直接打分。因为打分的尺度太主观了。张三觉得这个回答 7.5 分，李四觉得 8.5 分。但排序是稳定的，所有标注员都能判断 A 比 B 好。</p>
+<p>现在你有了一个自动打分器。它可以告诉你任何回答的质量高低。</p>
+<p>第三步。PPO。Proximal Policy Optimization。</p>
+<p>这是整个 RLHF 里最复杂的部分。你有一个策略模型（就是 SFT 之后的模型）。你有一个奖励模型（就是 RM）。你给策略模型一组 prompt，让它生成回答。奖励模型对这些回答打分。你再根据分数更新策略模型的参数，让高分回答的生成概率变高。</p>
+<p>PPO 的核心是 Clip 机制。如果新旧策略的概率比超过了 [1-ε, 1+ε] 的范围，梯度就被截断。这防止单步更新过大导致训练崩溃。它是 PPO 名字里 Proximal（近端的）的来源，保持新策略离旧策略不远。</p>
+<p>PPO 还有一个关键的约束，KL 散度惩罚。让新策略的输出分布不要偏离原始的 SFT 模型太远。如果没有这个约束，策略模型可能会走火入魔，为了拿高分不断生成 RM 喜欢的但完全失去语言质量的回答。这叫 Reward Hacking，模型学会了怎么讨好评委而不是真正提升回答质量。KL 约束就是给模型划了一条不能超过的红线。</p>
+<p>PPO 训练需要同时维护四个模型，策略模型（主训练对象）、参考模型（冻结的 SFT 模型，计算 KL）、奖励模型（RM）、价值模型（辅助 PPO 的优势函数计算）。光是显存需求就比普通训练大好几倍。</p>
+<p>这就是为什么真正做完整 RLHF 的门槛这么高。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「RM 为什么不直接用人类标注打分而要排序？」</strong></p>
+<p>排序是稳定的。打分是主观的。一个标注员可能觉得所有回答都很好全部打 9 分，另一个可能觉得都一般全部打 5 分。这两个标注员产生的是完全不同的训练数据。但排序的结果是一致的，A&gt;B&gt;C 这个顺序在所有人眼里都一样。排序的数据质量和复用率远超打分。</p>
+<p><strong>追问 2：「PPO 能不能直接用一个现成的打分模型替代 RM？」</strong></p>
+<p>能。但专用 RM 的效果通常更好。因为专用 RM 是用你的 SFT 模型生成的回答微调过的，它更懂你的模型可能出什么类型的问题。用别人训的 RM 可能会产生误判。但 GRPO 选择了一条不同的路，不用 RM 而是用一组回答的相对分数来做优化。下节课聊 GRPO。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>Reward Hacking 在你自己的生活中出现过吗，你为了得到一个好的评价而刻意「讨好」评价标准而不是真正改进自己。试着找出一个你自己的例子。</p>
+</li>
+<li>
+<p>如果一个 RM 把「回答越长越好」作为评价标准，PPO 训练后的模型会变成什么样。你如何从 RLHF 流程中排查并修复这个偏见。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-15">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-17">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-17" class="lesson">
+  <div class="lesson-part-label">第三部分：炼金 —— 模型是怎么训出来的</div>
+  <h1>第 17 课：DPO 和 GRPO，更聪明的对齐方式</h1>
+<p>PPO 是 RLHF 的工程标准。但它太贵了。</p>
+<p>四个模型同时维护。两倍于普通训练的计算量。需要大量人类偏好标注数据来训练 RM。还需要小心翼翼地调 Clip 阈值、KL 惩罚系数、学习率衰减，像在悬崖边上跳舞，一不留神就掉下去。</p>
+<p>有没有更简单的方式做到同样的事情。</p>
+<p>有。DPO 和 GRPO 就是答案。</p>
+<p>DPO 的全称是 Direct Preference Optimization。直接偏好优化。</p>
+<p>它的想法大胆到让我第一次读论文的时候愣住了。DPO 说，我们不需要 RM。我们不需要 PPO。我们不需要四个模型。我们只需要偏好数据，人类标注的 A &gt; B 的回答对，和原始的 SFT 模型。然后直接从偏好数据里推导出一个跟 RLHF 等价的损失函数。</p>
+<p>DPO 的数学推导用到了 RLHF 最优策略的闭式解。这个最优策略可以写成对偏好数据的某种加权。于是你可以绕过强化学习的整个采样-打分-更新的循环，直接拿偏好数据做一次监督学习。模型一次梯度更新就能靠近人类偏好的方向。</p>
+<p>效果接近 PPO。计算成本只有 SFT 级别。不需要训练 RM，不需要维护四个模型，不需要调 Clip 和 KL 的超参。极度简洁。</p>
+<p>但 DPO 依赖偏好数据的质量。如果偏好标注质量不高，DPO 学出来的东西直接跑偏。RLHF 的 RM 在一定程度上可以通过大量训练来平滑掉数据噪声，DPO 没有这个缓冲。</p>
+<p>然后到了 2024 年，DeepSeek 搞出了 GRPO，Group Relative Policy Optimization。</p>
+<p>GRPO 的想法是，PPO 里的价值模型很贵而且不必要。那就把价值模型去掉。不用一个单独的网络来评估当前状态的好坏。改用一组回答的相对质量来判断。</p>
+<p>GRPO 的做法。给同一个 prompt，生成好几个回答（比如 8 个）。RM 对每个回答打分。用这 8 个分数的均值和标准差做归一化，得到每个回答的「相对优势」。相对优势不依赖于绝对分数，你不需要知道这个回答在全局坐标系里是好还是坏。你只需要知道在 8 个回答里，这个排第几。</p>
+<p>然后做策略更新。跟 PPO 一样有 Clip，跟 PPO 一样有 KL 约束。但没有价值模型。计算量直接砍掉一大块。</p>
+<p>GRPO 还有一个聪明的设计，它把 KL 散度约束从 reward 里挪到了 loss 函数里。相当于给了 KL 一个「强制执法权」。在 RLHF 里 KL 约束是一个被加在 reward 上的惩罚项，约束力比较「软」。GRPO 把它变成 loss 的一部分，更「硬」，更能防止策略跑偏。</p>
+<p>这三个方案形成了一个很好的选择矩阵。PPO 效果最稳但成本最高。DPO 成本最低但对数据质量要求最高。GRPO 在成本和效果之间找了一个漂亮的平衡。</p>
+<p>如果你有预算，上 PPO。如果预算紧张，用 DPO。如果想稳妥，选 GRPO。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「DPO 的效果能在所有任务上追平 RLHF 吗？」</strong></p>
+<p>在大部分标准 benchmark 上可以。但在需要精确奖励建模的任务上（比如安全性相关的对齐），RLHF 的效果可能更稳定。因为 RLHF 的 RM 经过了专门的训练和校准，DPO 直接从偏好数据推公式，缺少这个校准过程。</p>
+<p><strong>追问 2：「GRPO 为什么不直接在 DPO 的基础上优化？」</strong></p>
+<p>DPO 的数学假设是二选一的偏好对。GRPO 假设的是一组回答之间的相对排序。这两个假设不一样。GRPO 更适合那种「同时生成一批回答再互相比」的采样策略。DPO 更适合人工标注的成对偏好数据。</p>
+<p><strong>追问 3：「什么是 HHh 原则？」</strong></p>
+<p>Helpful（有用），Honest（诚实），Harmless（无害）。这是 RLHF 对齐的三大目标。回答要有用，不能编造事实，不能产生有害内容。RM 的评分标准就是围绕这三个维度建立的。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>你更倾向于「有人给你打分然后你根据分数改进」（PPO）还是「你看到两组对比然后直接学更好的那个」（DPO）。哪种方式更适合你学新技能的体验。</p>
+</li>
+<li>
+<p>如果 GRPO 在 8 个回答里选出的「相对最好」恰好 8 个都很差怎么办。RM 给了高分不代表回答真的好。这个漏洞怎么补。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-16">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-18">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-18" class="lesson">
+  <div class="lesson-part-label">第三部分：炼金 —— 模型是怎么训出来的</div>
+  <h1>第 18 课：LoRA，穷玩大模型的终极答案</h1>
+<p>上一课我们聊的对齐技术，每一步都在烧钱。</p>
+<p>那如果你只有一张 RTX 4090，24GB 显存。你想微调一个 Llama 7B。全参微调需要大概 56GB。你差了一半还多。</p>
+<p>怎么办。LoRA 就是答案。</p>
+<p>LoRA 的全称是 Low-Rank Adaptation。低秩适配。名字听着吓人，拆开极其简单。</p>
+<p>你有一个预训练好的大模型。所有参数被冻住，不更新。你在原始的每一个权重矩阵旁边加了一条小路，两个极小的矩阵 B 和 A。B 是 d × r，A 是 r × d。r 是一个很小的数，通常是 8 或者 16。d 是模型的原始维度，通常是 4096。</p>
+<p>B × A 的结果尺寸跟原始权重 W 一样，都是 d × d。但 B 和 A 加起来的参数量极小。举个例子，4096 × 8 + 8 × 4096 ≈ 65000。而 W 本身的大小是 4096 × 4096 ≈ 16,000,000。差了将近 250 倍。</p>
+<p>训练的时候 W 不动。只更新 B 和 A。推理的时候 W' = W + B × A。原权重被微调后的 LoRA 矩阵修正。推理速度跟原模型完全一样。</p>
+<p>这就是 LoRA 为什么能在一张消费级显卡上微调 7B 模型。你只训了 0.1% 的参数。所有其余的参数都在冻干状态存着，不占优化器状态内存。</p>
+<p>LoRA 的数学假设是这样的。模型在适应新任务时，权重的变化量 ΔW 是低秩的，意思是这个变化只存在于少数几个低维方向。你不需要整个 d × d 空间里乱改，只需要在这几个方向上微调就够了。B 和 A 就是这两个低维方向上的投影矩阵。</p>
+<p>这个假设经过了大量实验验证，基本成立。而且可调的超参极少，r 选 8 或 16，alpha 设为 2×r。对其他超参基本不敏感。</p>
+<p>QLoRA 是 LoRA 加量化。基座模型用 4 bit 量化加载，原来 28 GB 的模型只需要 7 GB。然后用 LoRA 训 B 和 A。最终加上模型+LoRA 适配器+优化器状态，7B 模型用 QLoRA 微调只需要 6 到 8 GB 显存。一张老旧的 RTX 3060 也能跑。</p>
+<p>QLoRA 用了两个特殊的量化技术。NF4，Normal Float 4，一种针对神经网络权重的专用 4 bit 格式。双重量化，连量化参数本身都做了量化，进一步省显存。</p>
+<p>如果你预算极其有限，QLoRA 几乎是你唯一的合法选择。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「LoRA 的适配器训练完后能合入原模型吗？」</strong></p>
+<p>能。直接把 B × A 的结果加到 W 上就行。合入后推理开销完全为零，跟原模型一模一样的推理速度。这就是 LoRA 比 Adapter 更受欢迎的关键原因之一。</p>
+<p><strong>追问 2：「为什么 LoRA 的 α 通常设为 2r？」</strong></p>
+<p>α 是 LoRA 输出的缩放因子。如果 α = r，LoRA 的输出没有额外放大。如果 α = 2r，LoRA 的输出被放大了 2 倍，相当于给了低秩适配更大的「影响力」。实验表明 2r 在很多任务上效果最佳。但这只是一个经验值，具体场景下可以调。</p>
+<p><strong>追问 3：「LoRA 应该加在模型的哪些层上？」</strong></p>
+<p>原论文加在 Attention 层的 Q、K、V、O 四个投影矩阵上。这是效果最好的配置。只加 Q 和 V 也能接近全加的效果，而且参数更少。绝大多数实践者选 Q 和 V，偶尔加上 O。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>用装修房子的比喻总结全参微调、LoRA 和 QLoRA 的区别。各对应什么装修策略。</p>
+</li>
+<li>
+<p>如果你发现 LoRA 在你的任务上效果不够好，你会先调整哪个参数。r 的大小还是 α 的取值还是训练的 epoch 数。给出你的优先级和理由。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-17">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-19">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-19" class="lesson">
+  <div class="lesson-part-label">第三部分：炼金 —— 模型是怎么训出来的</div>
+  <h1>第 19 课：训练硬核补充，过拟合、梯度、Warmup、ZeRO</h1>
+<p>前面几课我们聊的是「怎么训」。这一课聊的是「训练的时候会出什么事，出了事怎么办」。四个概念，都是训练大模型绕不开的。</p>
+<p>先说差点把我整崩溃的，Warmup。</p>
+<p>第 12 课我们聊了 Pre-norm 和 Post-norm。记得不。Post-norm 把 LayerNorm 放在残差之后，梯度要穿过 LayerNorm 的除法，训练初期很脆弱。</p>
+<p>Warmup 就是一个从极小学习率开始慢慢加到正常学习率的「热身期」。前几千步，学习率从接近 0 线性增长到你设定的正常值。给网络一个慢慢找到稳定信号方向的时间窗口，等到内部分布趋于稳定了再正常加速。</p>
+<p>Pre-norm 流行之后 Warmup 的必要性大幅降低。但即使 Pre-norm 理论上不需要 Warmup，实践者通常还是会加一个极短的（几百步）Warmup 作为保险。</p>
+<p>然后是过拟合。模型在训练集上表现完美，一到测试集就崩。像是把考试答案背下来了但完全没理解知识点。</p>
+<p>怎么发现过拟合。训练 Loss 一直下降，验证 Loss 开始上升。这两条曲线的分叉点就是过拟合开始的地方。解决方案也简单。加正则化，Dropout、权重衰减。用更多数据或者数据增强。早停，验证 Loss 一抬头就停。</p>
+<p>PEFT 系列（LoRA 等）天然防过拟合，因为你只训了 0.1% 的参数，模型根本没机会去记训练数据的噪声。</p>
+<p>梯度问题。梯度过大叫梯度爆炸，参数更新量太大，模型直接跳飞了。梯度过小叫梯度消失，参数几乎不动，干训不进步。</p>
+<p>梯度爆炸的解法是梯度裁剪，把梯度的模长限制在一个上限（通常是 1.0）。超过上限就等比缩放。简单粗暴但极其有效。</p>
+<p>梯度消失的解法是残差连接（第 10 课）和好的初始化策略。Transformer 里有残差连接，这个问题已经大幅缓解了。</p>
+<p>最后是 ZeRO。全称 Zero Redundancy Optimizer。这是分布式训练领域最重要的发明之一。</p>
+<p>标准的数据并行训练中，每张显卡都要存完整的优化器状态。8 张卡就是 8 份完全相同的优化器状态，大量冗余。ZeRO 把这个冗余砍掉了。</p>
+<p>ZeRO 分三个阶段。Stage 1，优化器状态分片。Adam 的一阶矩和二阶矩分摊到不同卡上。Stage 2，梯度分片。Stage 3，连参数本身也分片，每张卡只存模型参数的一部分。</p>
+<p>开了 ZeRO-3，理论上可以用数百张甚至上千张 GPU 训练万亿参数级别的模型，每张卡的显存负担被分摊到了极限。DeepSpeed 和 PyTorch FSDP 都实现了 ZeRO。它是现代大模型训练的标配。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「梯度裁剪的阈值怎么选？」</strong></p>
+<p>1.0 是最常见的默认值。太小（比如 0.1）会严重减缓训练。太大（比如 10.0）几乎等于没裁。实践中可以在训练早期监控梯度范数的分布，正常梯度的范数峰值是多少，裁剪阈值设在这个值附近。</p>
+<p><strong>追问 2：「凭什么 PEFT 就天然防过拟合？」</strong></p>
+<p>少量可训练参数意味着低表达容量，模型无法完美拟合训练集里的噪声。全参微调时 70 亿参数都有自由度去记训练集，PEFT 只有几百万参数在动。想记也记不住。</p>
+<p><strong>追问 3：「ZeRO-3 需要多少 GPU？」</strong></p>
+<p>理论上 2 张 GPU 就能用 ZeRO-3。但实际上模型越大，分片越细，通信开销越大。千亿参数模型通常用 16-64 张 GPU 配合 ZeRO-3，万亿参数模型需要上百张。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>你做任何需要练习的事情，学吉他、打游戏、练跑步，碰到「过拟合」吗（练习中表现极好，正式比赛拉胯）。你是怎么解决这些问题的。</p>
+</li>
+<li>
+<p>如果你有无限显存和一亿预算，是否还需要 ZeRO 和 PEFT。这些省显存的技术在什么场景下会变得不再必要。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-18">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-20">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-20" class="lesson">
+  <div class="lesson-part-label">第四部分：落地 —— 大模型的十八般武艺</div>
+  <h1>第 20 课：RAG，让模型会查资料</h1>
+<p>去年我用 Claude 查一个函数的用法。它给我写了一整段看起来非常标准的代码。我复制进项目，跑了一下，报错了。</p>
+<p>那个函数根本不存在。</p>
+<p>幻觉。大模型一本正经地编出了一个不存在的 API，参数列表完整、返回值类型正确、文档风格完全吻合。唯一的问题是它在真实世界里不存在。</p>
+<p>这就是 RAG 出现的根本原因。</p>
+<p>RAG 的全称是 Retrieval-Augmented Generation。检索增强生成。名字听着学术，做法极其直白。</p>
+<p>不让模型凭记忆回答。给它一本参考书。让它翻完参考书再回答。</p>
+<p>一个完整的 RAG 系统有五步。</p>
+<p>第一步，切分。把你要参考的文档切成小块。每块大概几百个 Token。块太大了检索不精准，模型找不到具体的那一段。块太小了上下文不够，模型看了那几个字猜不出完整意思。通常 200 到 500 个 Token 之间，根据不同任务调整。</p>
+<p>第二步，建索引。把每一块用 embedding 模型转成向量。embedding 就是用一个专门的模型把一段文本压缩成一个固定维度的向量，语义相近的文本，向量在空间里就挨得近。把这些向量存进向量数据库里。</p>
+<p>第三步，查询。用户提问。把问题也转成向量。在向量数据库里找跟这个向量最接近的前 K 个文本块。这个 K 一般选 3 到 10。太少信息不够。太多噪音干扰模型。</p>
+<p>第四步，混合检索。纯向量检索有两个致命问题。同义词，「车」和「汽车」语义一样但向量可能没那么近。精确匹配，你要找产品型号「XPS-9510」，向量检索给你找了一堆笔记本电脑相关的段落但就是没这个型号。所以混合检索通常同时用向量检索（语义相近）和关键词检索（BM25 等传统搜索），两份结果拼在一起再重排序。</p>
+<p>第五步，生成。把检索到的文本块和用户的原始问题拼成一个 Prompt，「请根据以下资料回答用户的问题。资料，[检索结果]。问题，[用户问题]」。发给大模型。大模型基于这些上下文生成答案。</p>
+<p>为什么这一步能减少幻觉。因为模型不用凭记忆了。它面前就摆着正确答案。它只需要把上下文里的事实转述出来。它仍然可能编造，但概率大大降低了。</p>
+<p>坦率的讲，RAG 不是银弹。检索不到相关文档怎么办。检索到了但模型忽略检索结果继续编怎么办。这些问题没有一个完美的解法。但 RAG 至少给了模型一个「正确答案」的参考，比起裸大模型的纯记忆回答，已经是质的飞跃了。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「Chunk size 怎么定？」</strong></p>
+<p>没有万能数字。太小（50 Token）检索精准但上下文缺失。太大（2000 Token）上下文丰富但检索模糊。通常从 300 开始实验，根据任务的粒度调整。问答任务偏小，摘要任务偏大。</p>
+<p><strong>追问 2：「向量检索和关键词检索各有什么死穴？」</strong></p>
+<p>向量检索的同义词问题，语义相近但用词不同的文本可能检索不到。关键词检索的精确匹配问题，要找数字、编号、专有名词时必须用它。所以两者混合是最实用的方案。先用向量检索找语义相关的，再用关键词检索过滤精确匹配的，最后重排序。</p>
+<p><strong>追问 3：「RAG 怎么评估？」</strong></p>
+<p>三个维度。检索质量，检索到的文档跟答案真正相关的比例。生成质量，生成的答案是否准确引用了检索到的信息。端到端质量，最终答案是否解决了用户的问题。RAGAS 是目前最常用的 RAG 评估框架。</p>
+<p><strong>追问 4：「RAG 最头疼的问题和优化方向？」</strong></p>
+<p>检索噪声，检索到的文档跟问题无关，污染了上下文。检索盲区，问题需要的答案在数据库里但检索不出来。引用忠实度，模型用检索到的信息但曲解了原意。优化方向包括更精细的 Chunk 策略、更好的混合检索和重排序、更强的引用监督机制。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>设计一个你自己的 RAG 系统，假设你要帮你公司做一个内部知识库问答。文档库有什么类型。每步你会怎么选方案。</p>
+</li>
+<li>
+<p>RAG 能彻底解决幻觉吗。如果不能，那还能怎么进一步优化。给你三个 Layer 的防御体系你会怎么设计。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-19">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-21">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-21" class="lesson">
+  <div class="lesson-part-label">第四部分：落地 —— 大模型的十八般武艺</div>
+  <h1>第 21 课：推理优化全家桶</h1>
+<p>大模型训完了。你兴高采烈地打开网页，输了一句话。</p>
+<p>等了五秒钟。它在转圈。</p>
+<p>GPT-4 每生成一个 Token 可能要花十几毫秒。你的「请帮我写一份周报」生成了 500 个 Token。你等了快十秒。这就是大模型推理的宿命，训得快不代表跑得快。</p>
+<p>推理比训练更痛苦的原因在于，训练可以并行，一个 batch 里几百个样本一起算。推理必须串行，每次只生成一个 Token，下一个 Token 依赖上一个。GPU 空着等。</p>
+<p>第一招。KV Cache。</p>
+<p>每个 Token 在生成时都要做 Attention，而 Attention 需要 Q 和 K 计算相似度。在自回归生成中，已有 Token 的 K 和 V 每次都要重新算一遍，明明上一次迭代已经算过了，这次还得再来一遍。浪费。</p>
+<p>KV Cache 就是把已经算过的 K 和 V 缓存起来。下一个 Token 生成时，只需为这个新 Token 计算 Q、K、V，把新 K 和 V 追加到缓存后面。已有的 Token 直接用缓存，不重新算。</p>
+<p>显存占用大幅降低。但 KV Cache 本身占显存，每一层的每一个头都要存。序列越长，Cache 越大。对于 128K Token 的长序列，KV Cache 可能比模型本身还大。</p>
+<p>第二招。vLLM 和 PagedAttention。</p>
+<p>传统推理框架中，KV Cache 被预分配了一大块连续显存，不管实际用了多少。浪费严重。PagedAttention 把 KV Cache 像操作系统的内存分页一样切成小块。需要时分配一页，用完就回收。显存碎片化大幅减少，吞吐提升好几倍。vLLM 是目前最主流的推理引擎之一。</p>
+<p>第三招。量化。第五课聊过了。推理时把模型从 FP16 量到 INT8 或 INT4，显存砍半甚至砍到四分之一，推理速度翻倍。代价是可接受的精度损失。</p>
+<p>第四招。长上下文。之前说过原版 Transformer 的注意力复杂度 O(n²)。128K Token 的序列就是 160 亿次运算，一次推理就要这么多。FlashAttention 已经是标配了，不完整写出 n×n 矩阵，分块算，大幅减少 HBM 读写。另外还有稀疏注意力，不是每个 Token 都要看所有其他 Token。局部窗口加少量全局 Token，也能把 n² 压到 n×k。</p>
+<p>第五招。投机解码。用一个小模型快速生成几个候选 Token，然后用大模型一次性验证这几个候选是否正确。对的多就全收，错的就扔掉重来。因为大模型做验证（并行的矩阵乘法）比生成（串行的逐个 Token）快得多。在低熵任务上，比如写代码、翻译，投机解码有时候可以提速两到三倍。</p>
+<p>推理优化没有银弹。每个方案都是权衡。KV Cache 省计算但吃显存。量化省显存但掉精度。投机解码快但不稳定。你需要根据场景选组合。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「KV Cache 有多大？」</strong></p>
+<p>每层的每头缓存。大小 = 2 × 层数 × 头数 × d_head × 序列长度 × 精度字节数。GPT-3 175B，层数 96，头数 96，d_head=128，seq_len=2048，FP16 精度。粗略算约 2 × 96 × 96 × 128 × 2048 × 2 ≈ 9.6 GB。快赶上一个 7B 模型的参数量了。</p>
+<p><strong>追问 2：「PagedAttention 的页多大？」</strong></p>
+<p>通常跟操作系统的页大小对齐，4KB 或 16KB。太小管理开销大。太大碎片化解决得不够好。4KB 默认值在大多数场景下效果不错。</p>
+<p><strong>追问 3：「量化对推理速度的影响到底多大？」</strong></p>
+<p>INT8 相比 FP16，显存约减半，吞吐约增 1.5 到 2 倍。INT4 相比 FP16，显存减到四分之一，吞吐增 2 到 3 倍。但 INT4 需要更贵的反量化操作，实际加速比略低于理论值。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>你有 24GB 显存，要部署一个 13B 模型。设计一套推理优化方案，用哪些技术，先用哪个后用哪个。</p>
+</li>
+<li>
+<p>投机解码在什么场景下完全没用。为什么。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-20">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-22">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-22" class="lesson">
+  <div class="lesson-part-label">第四部分：落地 —— 大模型的十八般武艺</div>
+  <h1>第 22 课：AI Agent，让模型会干活</h1>
+<p>你让 ChatGPT 帮你写周报。它写了。</p>
+<p>你让它帮你发周报。它说，抱歉，我是一个语言模型，我无法执行操作。</p>
+<p>这就是「回答问题」和「完成任务的本质区别。Agent 把模型从「告诉你该怎么做」变成了「直接帮你做完」。它不只是生成文本。它能感知环境、做决策、执行动作、观察结果、然后根据结果继续调整下一步。</p>
+<p>一个完整的 Agent 有四件事。感知，知道现在是什么情况，输入了什么指令、拿到了什么返回结果、当前的上下文是什么。决策，基于感知到的信息决定下一步做什么，是继续执行还是换一个工具。执行，调用相应的工具，浏览器、计算器、搜索引擎、数据库、任何 API。学习，从执行结果中提取经验，更新自己的决策策略。</p>
+<p>感知才可能决策。决策才可能执行。执行后才会学习。四个环节轮流转。Agent 的循环周期是 P-D-E-O 观察-决策-执行-反馈。</p>
+<p>但一个纯 LLM Agent 有天然短板。它不会打电话，不会浏览网页，不会操作你的 Excel。它唯一会的交互方式就是生成文本。</p>
+<p>这就是 Function Calling 的意义。Function Call 给了模型一个「呼叫外部工具的按钮」。模型在生成回答的过程中，不说普通文本，而是输出一段结构化的 JSON，{function, "search_web", arguments, {query, "今天北京天气"}}。外部的 Agent 框架截获这段 JSON，执行真实的函数调用，去搜索引擎里请求结果，把结果返回给模型。模型再基于结果继续生成最终的文本回答。</p>
+<p>单 Agent 够用吗。不一定。多 Agent 系统（MAS）把多个各司其职的 Agent 组合成一个协同系统。一个 Agent 负责检索，一个负责分析，一个负责写报告。各干各的，信息在 Agent 之间流转。</p>
+<p>多 Agent 的复杂度是指数级的。Agent 之间的通信协议怎么设计。任务怎么分配。出错了谁来兜底。</p>
+<p>反应式 Agent 最简单，看到什么就反应什么，没有记忆，没有规划。对于简单的分类和判断够用。慎思式 Agent 会做规划和推理，维护内部状态，跟踪目标进展。混合式 Agent 结合两者，大部分时候快速反应，碰到复杂的决策时暂停、调用规划能力、做完再继续反应。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「Agent 和普通 Chatbot 到底差在哪？」</strong></p>
+<p>Chatbot 是单轮对话，你问它答。Agent 是多轮多步骤的任务执行，它能调用工具、观察结果、规划下一步。Chatbot 是被动响应，Agent 是主动完成任务。</p>
+<p><strong>追问 2：「Function Calling 和 API 调用有什么区别？」</strong></p>
+<p>Function Calling 是模型输出的结构化指令，模型决定「该调哪个函数」「传什么参数」。然后外部的框架去执行这个调用并返回结果。API 调用是程序员的活，固定逻辑。Function Calling 是模型自己的决策。</p>
+<p><strong>追问 3：「多 Agent 系统最大的坑是什么？」</strong></p>
+<p>通信开销。Agent 之间来回传递信息，每多一个 Agent 就多一堆通信链路。协调出错时会出现死循环，两个 Agent 互相等对方的结果。容错和超时机制必须从第一天就设计好。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>如果你的手机里有一个 Agent，它现在能帮你做的最有用的一件事是什么。详细描述它需要哪些工具、每一步怎么做。</p>
+</li>
+<li>
+<p>多 Agent 系统的协调者（Orchestrator）怎么避免成为瓶颈。你能想到分布式协调的方案吗。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-21">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-23">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-23" class="lesson">
+  <div class="lesson-part-label">第四部分：落地 —— 大模型的十八般武艺</div>
+  <h1>第 23 课：MCP / A2A / Function Call，让模型会叫外援</h1>
+<p>上节课我们聊了 Agent 怎么决策和执行。但执行需要一个东西，工具。模型要去搜索引擎里查资料，它得有一个「叫搜索引擎」的接口。</p>
+<p>三种方式。Function Call。MCP。A2A。</p>
+<p>Function Call 是最基础的。模型在生成文本时，输出一段 JSON 描述它想调什么函数、传什么参数。外部的 Agent 框架截获这段 JSON，执行真正的函数，把结果喂回模型。像一个遥控器，模型按按钮，外面的人去操作。</p>
+<p>优点极简。缺点是一次性的。模型每次调用工具都需要重新描述它要什么，没有持久化的工具记忆和管理机制。</p>
+<p>MCP 就是来填这个坑的。Model Context Protocol，模型上下文协议。Anthropic 2024 年发布的开放标准。它的目标是让任何 AI 应用能用统一的方式发现和使用外部工具。</p>
+<p>MCP 的核心架构是客户端-服务器。AI 宿主（比如 Claude Desktop）作为 MCP 客户端。每个工具或数据源封装成一个 MCP 服务器。服务器暴露标准化的接口，列出可用资源、描述工具的参数格式、处理请求。客户端通过 MCP 协议跟服务器通信。</p>
+<p>MCP 的杀手锏在于标准化。你写一个 MCP 服务器连接你的公司数据库，Claude 能用，任何支持 MCP 的 AI 应用都能用。工具一次开发，到处复用。社区里已经有数百个现成的 MCP 服务器，Google Drive、GitHub、Slack、PostgreSQL。拿来即用，无需配置。</p>
+<p>A2A 是 Agent-to-Agent 协议。Google 2024 年发布的。MCP 解决的是模型与工具之间的通信。A2A 解决的是 Agent 与 Agent 之间的通信。</p>
+<p>不同团队、不同公司开发的 Agent 需要互相对话。你的采购 Agent 需要跟供应商的库存 Agent 确认交货时间。A2A 定义了 Agent 之间发现、握手、任务分配、结果回传的标准流程。跨组织的互操作性是它的核心价值。</p>
+<p>Skill 是一个更轻量的概念。说到底就是一段预定义的 Prompt 加调用规范，告诉模型「当你看到用户想做什么时，按这套流程走，调这个工具」。MCP 是通用工具层，Skill 是场景化的工具编排。两者互补。</p>
+<p>至于 MCP Server 怎么搭，通常用 Python 的 FastMCP 或 TypeScript 的 SDK。几步就能搭一个简单的 Server。但生产级的 Server 涉及认证鉴权、错误处理、超时重试、状态管理等一堆工程问题。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「MCP 和传统 API 有什么不同？」</strong></p>
+<p>传统 API 是工具自己定义的接口格式，每个工具一种格式，集成 N 个工具要看 N 份文档。MCP 是统一的协议层，所有工具用同一种方式暴露自己，客户端用同一种方式发现和调用。一次适配，覆盖所有。</p>
+<p><strong>追问 2：「A2A 跟 MCP 冲突吗？」</strong></p>
+<p>不冲突。MCP 是模型和工具之间的桥梁。A2A 是 Agent 和 Agent 之间的桥梁。Google 和 Anthropic 在设计时有意让它们互不重合。一个系统里可以同时用 MCP 做工具调用、用 A2A 做 Agent 协同。</p>
+<p><strong>追问 3：「Function Calling 和 MCP 能不能互换？」</strong></p>
+<p>Function Calling 是 MCP 的底层传输机制之一。MCP 比 Function Calling 多了一层工具发现和标准化描述。Function Calling 是模型输出的一句「我想调某某函数」。MCP 多了一步「先看看周围有哪些工具可用，再决定调哪个」。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>你手上有三个工具，邮件系统、日历、Jira。用 MCP 把它们封装起来。你会怎么设计每个 Server 的接口。</p>
+</li>
+<li>
+<p>两个公司的 Agent 要通过 A2A 协同，采购 Agent 和供应商 Agent。你设计一个通信协议，至少要包含哪些字段和流程。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-22">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-24">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-24" class="lesson">
+  <div class="lesson-part-label">第四部分：落地 —— 大模型的十八般武艺</div>
+  <h1>第 24 课：前沿架构，MoE、GQA、DeepSeek 怎么玩的</h1>
+<p>过去的 6 年里 Transformer 的内核没有变过，注意力、残差、归一化、位置编码。但外围架构成了一片狂野的实验场。2024 到 2025 年最沸腾的三个创新，MoE、GQA、还有 DeepSeek 的开源奇迹。</p>
+<p>先说 MoE。Mixture of Experts。混合专家。</p>
+<p>传统 Transformer 每一层的 FFN 是一个密集的大矩阵。MoE 把这个大矩阵拆成多个小矩阵，每个叫一个「专家」。一个 Token 来了之后，不是让所有专家都处理。而是用一个小型路由网络判断这个 Token 更需要哪些专家的帮助，选 Top-K（通常 K=2）。只有被选中的专家才激活计算。</p>
+<p>效果是参数量暴增但计算量不暴增。DeepSeek-V3 有 1.6 万亿参数，但每次推理只激活 490 亿。参数量大所以表征能力强，激活量小所以推理成本低。完美兼顾。</p>
+<p>MoE 训练难。负载均衡，有些专家会变成「网红」被大量 Token 选中，其他专家闲置。辅助损失可以缓解但增加了训练复杂度。通信开销，不同专家可能在不同 GPU 上，Token 需要在 GPU 之间路由。</p>
+<p>再说 GQA。Grouped Query Attention。分组查询注意力。</p>
+<p>标准的 Multi-Head Attention 中，Q、K、V 有相同数量的头。MQA（Multi-Query Attention）把 K 和 V 压成 1 个头，Q 保持多头。参数量骤降但 K 和 V 的信息瓶颈可能损伤效果。GQA 是一种中间方案，K 和 V 分成 G 组，Q 保持全头。组内的 Q 共享同一组 K 和 V。Llama 2 和 Qwen 用的就是 GQA。在精度和速度之间找了一个漂亮的折中。</p>
+<p>SwiGLU。一个激活函数。原来 FFN 用 ReLU 做非线性，负数直接砍零。SwiGLU 用 Swish 激活的门控单元，平滑过渡，信息保留更多。Llama 引入后基本上所有新一代模型都跟进了。属于那种「效果有提升但你不做也不会死」的微优化。</p>
+<p>DeepSeek-V3 把这些技术全整合了。MoE 做参数规模。GQA 做推理加速。还有 Multi-head Latent Attention，把 KV Cache 压到一个极小的潜在空间里，显存占用大幅压缩。它能在 128K Token 的长序列上流畅推理，同时保持开源模型里顶尖的综合能力。这是工程系统设计的教科书级案例。</p>
+<p>安全性。Llama Guard 和 Prompt Guard 是做输入输出过滤。模型本身也有 RLHF 的对齐约束，拒绝回答武器、毒品、色情等敏感话题。但越狱攻击始终存在，用巧妙的 Prompt 绕过了安全护栏。攻防在持续迭代。</p>
+<hr />
+<h2 id="追问模块">追问模块</h2>
+<p><strong>追问 1：「MoE 的路由网络是怎么训练的？」</strong></p>
+<p>跟主模型一起训。路由网络（也叫门控网络）是一个小型的线性层加 Softmax。它的梯度通过 Top-K 选择的 Token 回传。辅助负载均衡损失确保专家使用率均衡。</p>
+<p><strong>追问 2：「GQA 相比 MHA 差多少精度？」</strong></p>
+<p>大多数任务上精度损失感知不到，1% 到 2% 的 benchmark 差异。但推理显存（KV Cache 部分）降低倍数等于 G 值。Llama 2 70B 用 GQA(G=8) 相比 MHA(头数 64) 把 KV Cache 压到 1/8。</p>
+<p><strong>追问 3：「DeepSeek-V3 的 MLA 是什么原理？」</strong></p>
+<p>MLA 把 KV 投影到一个比 d_head 更小的潜在维度，从潜在空间再恢复完整 KV。相当于给 KV 做了有监督的有损压缩。128K 长序列推理时 KV Cache 可降至传统方案的 1/10。这是 DeepSeek 长上下文推理便宜的核心原因。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>MoE 的专家调度像不像你公司里的部门分派，有些部门常年满负荷，有些部门闲着。你有什么管理学的办法解决这个问题。MoE 的解决方案跟你的一样吗。</p>
+</li>
+<li>
+<p>如果 GQA 的 G 越大（越接近 MHA），精度越高但越慢。G 越小（越接近 MQA），速度越快但精度越低。给你一个新模型，你怎么定这个 G 值。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-23">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-25">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-25" class="lesson">
+  <div class="lesson-part-label">第五部分：实战 —— 面试现场还原</div>
+  <h1>第 25 课：大厂真题精讲（上）</h1>
+<p>前面的 24 课你在学知识。这两课你回到面试现场。</p>
+<p>不是给你标准答案让你背。是把面试官的追问路径还原出来，他先问什么，你答了什么之后他接着问什么，从哪个方向追问，问多深算深。你跟着这个路径走，就知道自己缺什么。</p>
+<p>记住一条铁律。大部分面试官不是故意为难你。他问的是他日常工作中真的会碰到的问题。你如果能用自己的话把他的问题讲清楚，他就服。</p>
+<p>五道真题。</p>
+<hr />
+<p>字节跳动。PEFT 方案你怎么选。</p>
+<p>不是让你背 LoRA 的定义。他问的是决策能力。你怎么选。基于什么因素。</p>
+<p>标准回答先给结论。通用场景首选 LoRA。显存极度受限时选 QLoRA。精度要求极高且不在乎推理开销时选 Adapter。简单分类任务能用 Prompt Tuning 就不用 LoRA。</p>
+<p>追问。你说 r=8 到 16，怎么知道该选 8 还是 16。看任务复杂度。任务越复杂需要越高的秩。简单的情感分类 r=4 甚至 r=2 都够。复杂推理任务需要 r=16 甚至 r=32。另外可以观察训练 Loss，如果 Loss 不降了但还没到你的期望水平，试着加 r。</p>
+<p>追问 2。你把 QLoRA 和 LoRA 的区别给我讲透。QLoRA 就是 LoRA 加 NF4 量化，基座模型被压到 4 bit，LoRA 适配器保持 FP16 训练。NF4 是一种针对正态分布数据设计的 4 bit 格式，比普通的 INT4 对神经网络权重的表达更精准。还有双重量化，连量化的 scale 和 zero-point 参数本身也被量化了，进一步省显存。</p>
+<p>追问 3。你实际落过地吗，碰到什么坑。诚实说。LoRA 的 alpha 和 r 的比例出问题会让训练不稳定。alpha/r 太小适配器效果太弱，太大适配器压过原始模型导致原来的能力丢失。QLoRA 的显存占用不是完全可预测的，实际占用往往比理论值高 10% 到 20%，因为量化参数、缓存、临时张量也占地方。</p>
+<hr />
+<p>腾讯。RAG 系统你怎么设计。</p>
+<p>这不是一个技术选型题。这是一个系统设计题。你从切分开始，一路讲到生成，再讲评估，再讲坑。</p>
+<p>标准回答。五步。文档切分（200 到 500 Token 每块），embedding 索引（选 BGE 或 text-embedding-3），向量检索加关键词混合召（BM25 做精确匹配），重排序（Cross-Encoder 重排前 K 个候选），生成（拼 Prompt 喂 LLM）。评估用 RAGAS，检索召回率、答案忠实度、端到端相关性三个维度分别打分。</p>
+<p>追问。chunk size 你是怎么试出来的。从 300 开始，跑一批典型问题，看检索召回率，被正确检索的文档占总相关文档的比例。太小了召回碎片化，一个完整的段落被切成了三块，只能检索到其中一块。太大了召回模糊，500 字的文档块包含了太多无关信息。一般在 200 到 500 之间反复试。不同文档类型（新闻、技术文档、聊天记录）的最优 chunk size 都不一样。</p>
+<p>追问 2。向量数据库你打算用哪个，为什么。ChromaDB 做原型最快，零配置。Milvus 做生产，支持分布式、十亿级向量、混合检索。Qdrant 介于两者之间。不是哪个好哪个不好，是你的阶段需求决定的。</p>
+<hr />
+<p>阿里巴巴。偏差和方差怎么把握。</p>
+<p>经典但容易答乱。偏差高是欠拟合，训练误差高。方差高是过拟合，训练误差低测试误差高。大模型里面偏差和方差不是很好分析，因为训练一次太贵了没法跑几十次取方差。</p>
+<p>标准回答。偏差高就继续训，加数据，加参数，加训练步数。方差高就做正则化，Dropout，权重衰减，早停。PEFT 天然低方差，只训 0.1% 的参数很难过拟合。全参微调小心，数据少的时候方差极高。</p>
+<p>追问。Debug 的时候你怎么判断当前是偏差问题还是方差问题。看 Loss 曲线。训练 Loss 和验证 Loss 的 gap 小但都高，偏差。gap 大，方差。如果 gap 越来越大，马上停，加正则化。</p>
+<hr />
+<p>美团。Agent 你怎么拆。</p>
+<p>又是一个系统设计题。标准回答往四个维度拆。感知层，怎么获取环境信息（用户输入、工具返回、上下文）。决策层，基于感知信息选择行动（ReAct 框架，思考-行动-观察循环）。执行层，把决策变成真实的函数调用。记忆层，短期记忆（当前对话上下文），长期记忆（用户偏好、历史对话）。</p>
+<p>追问。单 Agent 和多 Agent 怎么选。任务边界清晰、可拆解的任务用多 Agent，一个负责检索一个负责分析。任务简单、不需要分工协作用单 Agent，减少通信开销和出错概率。</p>
+<p>追问 2。Agent 调用了错误的工具怎么办。错误处理的三层防御。第一层工具参数校验，入口处检查。第二层异常重试，失败后最多重试 N 次，换参数或换工具。第三层回退机制，多次失败后停止循环，给用户一个兜底回答。</p>
+<hr />
+<p>小红书。MoE 怎么玩更稳。</p>
+<p>标准回答。MoE 训练三个核心坑。负载均衡，网红专家和闲置专家。解法是加辅助负载均衡损失。通信开销，专家在不同 GPU 之间路由 Token。解法是 All-to-All 通信优化。训练不稳定，不同专家收到不同 Token 导致训练内的梯度骤变。解法是更保守的学习率搭配更频繁的负载均衡检查。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>挑上面一道真题，用你前面学过的 24 课知识，自己组织一个完整的回答。录下来自己听一遍，看看哪里卡壳。</p>
+</li>
+<li>
+<p>你觉得这五道题里，哪一道的追问路径最考验你有没有实际项目经验。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-24">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-26">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-26" class="lesson">
+  <div class="lesson-part-label">第五部分：实战 —— 面试现场还原</div>
+  <h1>第 26 课：大厂真题精讲（下）+ 系统设计 + 项目讲述</h1>
+<p>最后一课。剩下五道大厂真题，加一道系统设计大题，加你怎么在面试里讲自己的项目。</p>
+<hr />
+<p>京东。模型上线评估闭环怎么搭。</p>
+<p>这不是推理题。这是工程架构题。从部署到监控到反馈到迭代，闭环要完整。</p>
+<p>标准回答。四个环节。部署，选推理引擎（vLLM 或 TGI），配好量化和 KV Cache。监控，延迟 P50/P99、吞吐 Token/s、错误率、显存利用率。评估，线上 A/B 测试（新模型 vs 旧模型），离线 benchmark。反馈，线上 badcase 收集→标注→加入训练集，每月或每季度打一个新版模型。</p>
+<p>追问。如果模型突然延迟飙升，排查流程是什么。看 GPU 利用率是否掉到 80% 以下（在等 IO），看 KV Cache 是否超限（序列太长了），看是否被批处理阻塞（batch 里有个超长序列拖累整个 batch）。</p>
+<hr />
+<p>百度。SFT 和对齐原理差在哪，怎么选路线。</p>
+<p>标准回答。SFT 是监督学习，模仿人类写的优秀回答。对齐全系列（RLHF/DPO/GRPO）是偏好学习，不仅模仿还要符合人类的价值偏好。SFT 让你会说话。对齐让你会说人话。</p>
+<p>追问。你一个项目首期只做了 SFT，第二期你要上对齐。你会选 RLHF、DPO 还是 GRPO，为什么。预算充足且安全要求高（比如客服、医疗助手）选 RLHF，效果最稳。预算紧张且追求快速迭代选 DPO，不需要训 RM。生成任务为主想省成本选 GRPO，它用同一批回答的相对分数优化，不需要价值模型。</p>
+<hr />
+<p>滴滴。为什么 Transformer 能取代 RNN。</p>
+<p>标准答题思路。并行计算，长距离依赖，可扩展性。RNN 串行处理，后一个 Token 必须等前一个 Token，Transformer 并行处理所有 Token。RNN 长序列梯度消失，几十步外的信息就变形了，Transformer 自注意力一步到所有位置。RNN 堆深了很难训练，Transformer 有残差连接可以堆几百层。</p>
+<hr />
+<p>开放题。挑一个你深入研究的模型聊聊。</p>
+<p>这不是知识测试。这是热情测试。面试官想知道你是不是真的对 AI 有兴趣，你有没有真的认真看过一个模型的架构、训练细节、设计理念。</p>
+<p>标准回答。挑一个你真的懂得模型的。比如 DeepSeek-V3。讲它的 MoE 怎么压低推理成本，GQA 怎么做 KV Cache 优化，MLA（Multi-head Latent Attention）怎么用潜在空间压缩 KV Cache 做到 128K 长上下文推理。讲它开源的意义，用几十分之一的推理成本跑出了接近 GPT-4 的能力。</p>
+<p>追问。你刚才说的这个设计，你自己有没有试着复现过。不用完整复现。你可以说你把 LoRA 的 Q 和 K 替换成了 GQA 的 K 和 V 的分组结构，在小数据集上验证了 KV Cache 节省的效果。</p>
+<hr />
+<p>最后一道。系统设计。大模型项目从架构角度怎么搭。</p>
+<p>这是大题的收尾。你没法在五分钟内讲完整个架构。不用讲了。给一个清晰的模块划分。</p>
+<p>标准回答。七个模块。数据层（训练数据清洗、标注流水线），模型层（选基座模型、微调策略），训练层（分布式训练、ZeRO、混合精度），推理引擎层（vLLM、量化、KV Cache），应用层（Agent 框架、RAG、Prompt 管理），监控层（延迟、吞吐、badcase 追踪），安全层（输入输出护栏、越狱检测）。</p>
+<p>每个模块选一样你真正做过的技术展开讲五句，让面试官知道你不是在背架构图。</p>
+<hr />
+<p>关于讲项目。</p>
+<p>面试里最关键的一个环节是你讲自己做过的项目。大多数人挂在这里。不是项目不够好。是讲法不对。</p>
+<p>不要报菜名。不要「我用 LangChain 搭了一个 RAG 系统然后用 BGE 做 embedding 接 Milvus 做向量库」。面试官耳朵起茧了。</p>
+<p>这样讲。先讲业务场景，什么问题逼着你非做不可。再讲技术挑战，这个场景下普通方案为什么不 work。然后你选了什么技术，为什么选这个不是那个。最后结果，上线后真实的数据改进。再加一句如果再做一次你会改什么，展示反思能力。</p>
+<p>坦诚。你没做过的不装懂。做过的不要谦虚。数据不是越大越好，真实的数据比完美的数据有说服力。</p>
+<hr />
+<p>好了。二十六课全部写完。</p>
+<p>你翻到第一课的时候，我们讲了一个用乐高搭建大模型世界的比喻。</p>
+<p>现在回过头看。Token 是乐高零件。预训练是翻仓库学拼法。Transformer 是怎么拼零件的图纸。SFT 和 RLHF 是请师父教你拼得更精致。LoRA 是让你不换整盒乐高就能拼出新造型。RAG 是给你一本参考书让你查着拼。Agent 是让乐高自己动起来。</p>
+<p>整条流水线从零件到成品到自动化。全在这 26 课里了。</p>
+<p>如果你读到这儿的时候，能关掉屏幕，用自己的话给一个朋友讲清楚 Attention 是什么、LoRA 为什么好使、大模型为什么需要 Mask，那这本书没白写。</p>
+<hr />
+<h2 id="思考题">思考题</h2>
+<ol>
+<li>
+<p>回头翻一翻你最喜欢的五课。哪一课的比喻你记得最牢。试着用你自己的话重写那个比喻，换一个你更熟悉的生活场景。</p>
+</li>
+<li>
+<p>如果你用这本书的内容去面一场试，你觉得你最大的优势是什么。最大的盲区是什么。下一步你打算怎么补。</p>
+</li>
+</ol>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-25">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <span class="nav-disabled">下一课 →</span>
+  </nav>
+</section>
+
+
+<footer class="book-footer">
+  <p>《AI 大模型不难》—— 开源电子书</p>
+  <p>灵感来自鸢尾花书的视觉密度和数字生命卡兹克的叙事温度</p>
+  <p><a href="https://github.com/moyai/ai-llm-made-easy" target="_blank">GitHub</a></p>
+</footer>
+
+</article>
+
+</body>
+</html>

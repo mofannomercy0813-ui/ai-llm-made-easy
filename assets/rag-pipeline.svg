@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 300">
+  <title>RAG Pipeline: Retrieval-Augmented Generation</title>
+  <desc>Five-step RAG pipeline: Documents are chunked, embedded, stored in a vector database, retrieved by query, and fed to LLM with context to produce an answer.</desc>
+
+  <!-- Background -->
+  <rect width="680" height="300" fill="#FAFAFA" rx="6"/>
+
+  <style>
+    text { font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  </style>
+
+  <!-- Title -->
+  <text x="340" y="28" text-anchor="middle" font-size="16" font-weight="700" fill="#2C2C2C">RAG: Retrieval-Augmented Generation Pipeline</text>
+
+  <!-- Upper flow: Documents → Chunk → Embed → Vector DB -->
+  <!-- Step 1: Documents -->
+  <rect x="20" y="50" width="110" height="56" rx="8" fill="#E8F0FB" stroke="#378ADD" stroke-width="1.2"/>
+  <text x="75" y="72" text-anchor="middle" font-size="12" font-weight="600" fill="#1a5a9a">Documents</text>
+  <text x="75" y="88" text-anchor="middle" font-size="9" fill="#666">PDF, HTML, TXT...</text>
+
+  <!-- Arrow 1→2 -->
+  <line x1="130" y1="78" x2="158" y2="78" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- Step 2: Chunk -->
+  <rect x="162" y="50" width="110" height="56" rx="8" fill="#E8F0FB" stroke="#378ADD" stroke-width="1.2"/>
+  <text x="217" y="72" text-anchor="middle" font-size="12" font-weight="600" fill="#1a5a9a">Chunk</text>
+  <text x="217" y="88" text-anchor="middle" font-size="9" fill="#666">Split into pieces</text>
+
+  <!-- Arrow 2→3 -->
+  <line x1="272" y1="78" x2="300" y2="78" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- Step 3: Embed -->
+  <rect x="304" y="50" width="110" height="56" rx="8" fill="#E8F0FB" stroke="#378ADD" stroke-width="1.2"/>
+  <text x="359" y="72" text-anchor="middle" font-size="12" font-weight="600" fill="#1a5a9a">Embed</text>
+  <text x="359" y="88" text-anchor="middle" font-size="9" fill="#666">Vectorize chunks</text>
+
+  <!-- Arrow 3→4 -->
+  <line x1="414" y1="78" x2="442" y2="78" stroke="#378ADD" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
+
+  <!-- Step 4: Vector DB -->
+  <rect x="446" y="50" width="110" height="56" rx="8" fill="#E8F0FB" stroke="#378ADD" stroke-width="1.2"/>
+  <text x="501" y="72" text-anchor="middle" font-size="12" font-weight="600" fill="#1a5a9a">Vector DB</text>
+  <text x="501" y="88" text-anchor="middle" font-size="9" fill="#666">Store &amp; index</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="124" x2="640" y2="124" stroke="#E0E0E0" stroke-width="0.8"/>
+  <text x="340" y="138" text-anchor="middle" font-size="9" fill="#AAA">Offline Indexing (once) ———————————— Online Query (per request)</text>
+
+  <!-- Lower flow: Query → Retrieve → LLM+Context → Answer -->
+  <!-- Step: User Query -->
+  <rect x="20" y="158" width="120" height="56" rx="8" fill="#EEF5EC" stroke="#0F6E56" stroke-width="1.2"/>
+  <text x="80" y="180" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">User Query</text>
+  <text x="80" y="196" text-anchor="middle" font-size="9" fill="#666">Natural language</text>
+
+  <!-- Arrow to Embed (query) -->
+  <line x1="140" y1="186" x2="168" y2="186" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- Embed query -->
+  <rect x="172" y="158" width="100" height="56" rx="8" fill="#EEF5EC" stroke="#0F6E56" stroke-width="1.2"/>
+  <text x="222" y="180" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">Embed Query</text>
+  <text x="222" y="196" text-anchor="middle" font-size="9" fill="#666">Same encoder</text>
+
+  <!-- Arrow to Retrieval -->
+  <line x1="272" y1="186" x2="300" y2="186" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- Retrieval from Vector DB -->
+  <rect x="304" y="158" width="120" height="56" rx="8" fill="#EEF5EC" stroke="#0F6E56" stroke-width="1.2"/>
+  <text x="364" y="180" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">Retrieve Top-k</text>
+  <text x="364" y="196" text-anchor="middle" font-size="9" fill="#666">Similarity search</text>
+
+  <!-- Arrow from Vector DB down to Retrieve (dashed) -->
+  <path d="M 500 106 Q 500 124 480 134 L 390 152" stroke="#378ADD" stroke-width="1" stroke-dasharray="5,3" fill="none" marker-end="url(#arrowBlue)"/>
+  <text x="460" y="132" font-size="8" fill="#378ADD">lookup</text>
+
+  <!-- Arrow to LLM+Context -->
+  <line x1="424" y1="186" x2="452" y2="186" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- LLM + Context -->
+  <rect x="456" y="158" width="130" height="56" rx="8" fill="#EEF5EC" stroke="#0F6E56" stroke-width="1.2"/>
+  <text x="521" y="178" text-anchor="middle" font-size="12" font-weight="600" fill="#0F6E56">LLM + Context</text>
+  <text x="521" y="196" text-anchor="middle" font-size="9" fill="#666">Prompt with chunks</text>
+
+  <!-- Arrow to Answer -->
+  <line x1="586" y1="186" x2="614" y2="186" stroke="#0F6E56" stroke-width="1.5" marker-end="url(#arrowGreen)"/>
+
+  <!-- Answer -->
+  <rect x="618" y="158" width="50" height="56" rx="8" fill="#D5EBDF" stroke="#0F6E56" stroke-width="1.2"/>
+  <text x="643" y="186" text-anchor="middle" font-size="12" font-weight="700" fill="#0F6E56">Answer</text>
+
+  <!-- Bottom: Benefits -->
+  <rect x="80" y="236" width="520" height="48" rx="6" fill="#F5F5F5"/>
+
+  <circle cx="170" cy="260" r="6" fill="#0F6E56" opacity="0.5"/>
+  <text x="182" y="264" font-size="10" fill="#555">Up-to-date knowledge</text>
+
+  <circle cx="340" cy="260" r="6" fill="#0F6E56" opacity="0.5"/>
+  <text x="352" y="264" font-size="10" fill="#555">Reduced hallucination</text>
+
+  <circle cx="500" cy="260" r="6" fill="#0F6E56" opacity="0.5"/>
+  <text x="512" y="264" font-size="10" fill="#555">Source attribution</text>
+
+  <defs>
+    <marker id="arrowBlue" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#378ADD"/>
+    </marker>
+    <marker id="arrowGreen" viewBox="0 0 8 6" refX="8" refY="3" markerWidth="6" markerHeight="4" orient="auto">
+      <path d="M0,0 L8,3 L0,6" fill="#0F6E56"/>
+    </marker>
+  </defs>
+</svg>
