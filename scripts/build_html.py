@@ -845,33 +845,51 @@ def main():
 
 
 def generate_pdf():
-    """使用 weasyprint 生成 PDF"""
-    print("[pdf] 正在尝试生成 PDF...")
+    """使用 Chrome/Edge headless 模式生成 PDF"""
+    print("[pdf] 正在生成 PDF...")
 
-    # 检查 weasyprint 是否可用
+    # 尝试找 Chrome 或 Edge
+    chrome_paths = [
+        "C:/Program Files/Google/Chrome/Application/chrome.exe",
+        "C:/Program Files (x86)/Google/Chrome/Application/chrome.exe",
+        "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
+        "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
+    ]
+
+    chrome = None
+    for p in chrome_paths:
+        if os.path.exists(p):
+            chrome = p
+            break
+
+    if not chrome:
+        print("[pdf] 未找到 Chrome 或 Edge 浏览器")
+        print_manual_pdf_instructions()
+        return
+
     try:
-        import weasyprint  # noqa: F401
-    except ImportError:
-        print("[pdf] weasyprint 未安装，尝试安装...")
-        try:
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", "weasyprint"],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
-            import weasyprint  # noqa: F811
-        except Exception as e:
-            print(f"[pdf] 无法安装/导入 weasyprint: {e}")
+        html_url = OUTPUT_HTML.as_uri()
+        cmd = [
+            chrome,
+            "--headless",
+            "--disable-gpu",
+            "--no-sandbox",
+            f"--print-to-pdf={OUTPUT_PDF}",
+            "--no-pdf-header-footer",
+            html_url,
+        ]
+        subprocess.run(cmd, check=True, timeout=30, capture_output=True)
+        if OUTPUT_PDF.exists():
+            print(f"[done] PDF 已生成: {OUTPUT_PDF}")
+            print(f"       文件大小: {OUTPUT_PDF.stat().st_size / 1024 / 1024:.1f} MB")
+        else:
+            print("[pdf] PDF 生成失败，文件未创建")
             print_manual_pdf_instructions()
-            return
-
-    try:
-        from weasyprint import HTML
-        doc = HTML(filename=str(OUTPUT_HTML))
-        doc.write_pdf(str(OUTPUT_PDF))
-        print(f"[done] PDF 已生成: {OUTPUT_PDF}")
-        print(f"       文件大小: {OUTPUT_PDF.stat().st_size / 1024:.1f} KB")
+    except subprocess.TimeoutExpired:
+        print("[pdf] PDF 生成超时")
+        print_manual_pdf_instructions()
     except Exception as e:
-        print(f"[pdf] weasyprint 生成失败: {e}")
+        print(f"[pdf] 生成失败: {e}")
         print_manual_pdf_instructions()
 
 
