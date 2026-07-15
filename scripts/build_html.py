@@ -187,9 +187,8 @@ def build_full_html(lessons_data):
 {body_html}
 
 <footer class="book-footer">
-  <p>《AI 大模型不难》—— 开源电子书</p>
-  <p>灵感来自鸢尾花书的视觉密度和数字生命卡兹克的叙事温度</p>
-  <p><a href="https://github.com/moyai/ai-llm-made-easy" target="_blank">GitHub</a></p>
+  <p>《AI 大模型不难》— 周末读完的 LLM 面试通关书</p>
+  <p><a href="https://github.com/mofannomercy0813-ui/ai-llm-made-easy" target="_blank">GitHub</a></p>
 </footer>
 
 </article>
