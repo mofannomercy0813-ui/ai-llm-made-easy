@@ -4,4 +4,4 @@ __pycache__/
 node_modules/
 .book/
 _output/
-*.pdf
+# *.pdf  (放行 ai-llm-made-easy.pdf)
