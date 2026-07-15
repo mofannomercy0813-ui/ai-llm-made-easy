@@ -167,7 +167,7 @@ def build_full_html(lessons_data):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 大模型不难 —— 一本让零基础读者也能笑着看懂 Transformer 的开源书</title>
+<title>AI 大模型不难 —— 周末读完的 LLM 面试通关书</title>
 <style>
 {css}
 </style>
@@ -468,6 +468,24 @@ body {
   font-weight: 600;
   color: #444;
   margin: 1.5rem 0 0.5rem;
+}
+
+/* ── Math ──────────────────────────────────────────────── */
+.math-inline {
+  font-family: 'Cambria Math', 'Latin Modern Math', 'STIX Two Math', serif;
+  font-style: italic;
+  background: #F5F3EE;
+  padding: 0.1em 0.3em;
+  border-radius: 3px;
+}
+.math-display {
+  text-align: center;
+  font-family: 'Cambria Math', 'Latin Modern Math', 'STIX Two Math', serif;
+  font-size: 1.05rem;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background: #F5F3EE;
+  border-radius: 4px;
 }
 
 /* ── Paragraphs & Inline ──────────────────────────────── */
@@ -796,10 +814,71 @@ def strip_title_prefix(title):
     return re.sub(r'^第\s*\d+(\.\d+)?\s*课[：:]?\s*', '', title)
 
 
+def latex_to_unicode(md_text):
+    """将常见 LaTeX 公式转换为 Unicode 近似表示，无需 MathJax"""
+    replacements = [
+        # 希腊字母
+        (r'\\alpha', 'α'), (r'\\beta', 'β'), (r'\\gamma', 'γ'),
+        (r'\\theta', 'θ'), (r'\\sigma', 'σ'), (r'\\epsilon', 'ε'),
+        (r'\\mu', 'μ'), (r'\\pi', 'π'), (r'\\lambda', 'λ'),
+        # 数学符号
+        (r'\\propto', '∝'), (r'\\approx', '≈'), (r'\\times', '×'),
+        (r'\\cdot', '·'), (r'\\parallel', '∥'), (r'\\infty', '∞'),
+        (r'\\partial', '∂'), (r'\\mathbb{E}', '𝔼'), (r'\\sum', 'Σ'),
+        (r'\\prod', '∏'),
+        # 函数
+        (r'\\text\{softmax\}', 'softmax'), (r'\\text\{clip\}', 'clip'),
+        (r'\\text\{KL\}', 'KL'), (r'\\text\{CrossEntropy\}', 'CrossEntropy'),
+        (r'\\text\{PE\}', 'PE'), (r'\\log', 'log'),
+        # 上下标/分数
+        (r'\\sqrt\{([^}]+)\}', r'√(\1)'),
+        (r'\\frac\{([^}]+)\}\{([^}]+)\}', r'\1/\2'),
+        # 括号
+        (r'\\left\(', '('), (r'\\right\)', ')'),
+        (r'\\left\[', '['), (r'\\right\]', ']'),
+        (r'\\left\{', '{'), (r'\\right\}', '}'),
+        (r'\\parallel', '∥'),  # already above, just in case
+        # 通用：移除 \text 包装
+        (r'\\text\{([^}]+)\}', r'\1'),
+    ]
+
+    # 处理 $$...$$ 块级公式
+    def replace_display(m):
+        inner = m.group(1)
+        for pat, rep in replacements:
+            inner = re.sub(pat, rep, inner)
+        # 简化上下标
+        inner = re.sub(r'_\{([^}]+)\}', r'_\1', inner)
+        inner = re.sub(r'\_([a-zA-Z0-9]+)', r'_\1', inner)
+        inner = re.sub(r'\^\{([^}]+)\}', r'^\1', inner)
+        inner = re.sub(r'\^([a-zA-Z0-9]+)', r'^\1', inner)
+        # 移除多余花括号
+        inner = re.sub(r'\{([^}]+)\}', r'\1', inner)
+        return f'<p class="math-display">{inner}</p>'
+
+    # 处理 $$...$$ 块级公式
+    md_text = re.sub(r'\$\$(.+?)\$\$', replace_display, md_text, flags=re.DOTALL)
+
+    # 处理 $...$ 行内公式
+    def replace_inline(m):
+        inner = m.group(1)
+        for pat, rep in replacements:
+            inner = re.sub(pat, rep, inner)
+        inner = re.sub(r'_\{([^}]+)\}', r'_\1', inner)
+        inner = re.sub(r'\_([a-zA-Z0-9]+)', r'_\1', inner)
+        inner = re.sub(r'\^\{([^}]+)\}', r'^\1', inner)
+        inner = re.sub(r'\^([a-zA-Z0-9]+)', r'^\1', inner)
+        inner = re.sub(r'\{([^}]+)\}', r'\1', inner)
+        return f'<span class="math-inline">{inner}</span>'
+
+    md_text = re.sub(r'\$(.+?)\$', replace_inline, md_text)
+    return md_text
+
+
 def convert_md_to_html(md_text):
     """将 Markdown 文本转换为 HTML"""
     import markdown
-    md_text = strip_latex(md_text)
+    md_text = latex_to_unicode(md_text)
     return markdown.markdown(
         md_text,
         extensions=[
@@ -893,9 +972,11 @@ def generate_pdf():
             "--no-sandbox",
             f"--print-to-pdf={OUTPUT_PDF}",
             "--no-pdf-header-footer",
+            "--run-all-compositor-stages-before-draw",
+            "--virtual-time-budget=10000",
             html_url,
         ]
-        subprocess.run(cmd, check=True, timeout=30, capture_output=True)
+        subprocess.run(cmd, check=True, timeout=60, capture_output=True)
         if OUTPUT_PDF.exists():
             print(f"[done] PDF 已生成: {OUTPUT_PDF}")
             print(f"       文件大小: {OUTPUT_PDF.stat().st_size / 1024 / 1024:.1f} MB")
