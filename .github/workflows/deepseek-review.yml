@@ -1,0 +1,31 @@
+name: DeepSeek Code Review
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+# Fix: GraphQL Resource not accessible by integration error
+permissions:
+  pull-requests: write
+
+jobs:
+  deepseek-review:
+    runs-on: ubuntu-latest
+    name: AI Code Review
+    steps:
+      - name: DeepSeek Code Review
+        uses: hustcer/deepseek-review@v1
+        with:
+          chat-token: ${{ secrets.CHAT_TOKEN }}
+          model: deepseek-chat
+          temperature: 0.3
+          max-length: 30000
+          include-patterns: |
+            **/*.md
+            **/*.py
+            **/*.html
+            **/*.yml
+            **/*.yaml
