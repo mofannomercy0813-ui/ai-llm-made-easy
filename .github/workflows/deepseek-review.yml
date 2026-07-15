@@ -20,7 +20,7 @@ jobs:
         uses: hustcer/deepseek-review@v1
         with:
           chat-token: ${{ secrets.CHAT_TOKEN }}
-          model: deepseek-chat
+          model: deepseek-v4-pro
           temperature: 0.3
           max-length: 30000
           include-patterns: |
