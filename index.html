@@ -503,7 +503,7 @@ body {
 <header class="book-header">
   <h1 class="book-title">AI 大模型不难</h1>
   <p class="book-subtitle">一本让零基础读者也能笑着看懂 Transformer 的开源电子书</p>
-  <p class="book-meta">共 27 课 · 五大部分 · 从零到面试通关</p>
+  <p class="book-meta">共 29 课 · 五大部分 · 从零到面试通关</p>
 </header>
 
 <nav id="toc" class="toc">
@@ -514,6 +514,7 @@ body {
 <li class="toc-part">第一部分：世界观 —— 大模型到底是个什么东西</li>
 <li class="toc-lesson"><a href="#lesson-1">第 1 课 · 第 1 课：Token、预训练、微调，三个词讲完大模型的一生</a></li>
 <li class="toc-lesson"><a href="#lesson-2">第 2 课 · 第 2 课：涌现和幻觉，大模型的两个「意料之外」</a></li>
+<li class="toc-lesson"><a href="#lesson-3">第 3 课 · 第 3.5 课：解码策略，模型怎么从概率里挑出下一个词</a></li>
 <li class="toc-lesson"><a href="#lesson-3">第 3 课 · 第 3 课：你怎么跟模型说话，Prompt + CoT + ICL</a></li>
 <li class="toc-lesson"><a href="#lesson-4">第 4 课 · 第 4 课：RLHF 五分钟速览</a></li>
 <li class="toc-lesson"><a href="#lesson-5">第 5 课 · 第 5 课：省钱的三个办法，量化、蒸馏、分布式</a></li>
@@ -540,6 +541,7 @@ body {
 <li class="toc-lesson"><a href="#lesson-21">第 21 课 · 第 21 课：推理优化全家桶</a></li>
 <li class="toc-lesson"><a href="#lesson-22">第 22 课 · 第 22 课：AI Agent，让模型会干活</a></li>
 <li class="toc-lesson"><a href="#lesson-23">第 23 课 · 第 23 课：MCP / A2A / Function Call，让模型会叫外援</a></li>
+<li class="toc-lesson"><a href="#lesson-24">第 24 课 · 第 24.5 课：多模态/VLM 入门，模型怎么看图</a></li>
 <li class="toc-lesson"><a href="#lesson-24">第 24 课 · 第 24 课：前沿架构，MoE、GQA、DeepSeek 怎么玩的</a></li>
 <li class="toc-part">第五部分：实战 —— 面试现场还原</li>
 <li class="toc-lesson"><a href="#lesson-25">第 25 课 · 第 25 课：大厂真题精讲（上）</a></li>
@@ -707,6 +709,77 @@ body {
 
 <section id="lesson-3" class="lesson">
   <div class="lesson-part-label">第一部分：世界观 —— 大模型到底是个什么东西</div>
+  <h1>第 3.5 课：解码策略，模型怎么从概率里挑出下一个词</h1>
+<p>Attention 算完了，Transformer 跑完了，Softmax 输出了一个概率分布：[0.02, 0.15, 0.45, 0.08, 0.30]。总共 10 万个候选 Token，每个有个概率。现在要挑一个出来当下一个词。</p>
+<p>怎么挑？五种挑法。</p>
+<h3 id="greedy-search-永远选概率最大的">Greedy Search — 永远选概率最大的</h3>
+<p>每步挑概率最高的 Token。快，确定性强，每次同样的 prompt 永远输出同样的结果。致命伤：单调重复。因为一旦第一步选了「喜欢」，下一步「喜欢」之后最高概率的又是「你」，然后「喜欢」「你」「喜欢」「你」无限循环。不做任何创意生成。</p>
+<p>面试时说：Greedy 适合翻译、代码补全这类确定性任务。不适合开放式写作和对话。</p>
+<h3 id="beam-search-保留k条候选路">Beam Search — 保留K条候选路</h3>
+<p>不只保留最优的一条路，而是保留 K 条。K=4 就是 4 条。每一步对每条路径的所有可能 Token 做扩展，算累积概率，砍掉不行的，保留 Top-K。</p>
+<p>质量比 Greedy 高得多，「我昨天去了动物园，看到了一头大象」的概率比「我喜欢你喜欢你」高几百倍，Beam Search 能找出来。代价是 K 倍计算量，K 越大越贵。</p>
+<p>面试时说：Beam Search 是翻译和摘要的标配。但 K 太大（&gt;10）边际收益递减，K=3-5 最实用。</p>
+<h3 id="top-k-sampling-从top-k里随机抽">Top-K Sampling — 从Top-K里随机抽</h3>
+<p>不选固定的，从概率最高的 K 个 Token 里随机抽一个。K=50 就是从 Top-50 里按概率权重随机选。</p>
+<p>引入随机性解决了重复循环。但如果 Top-50 里有一堆低概率的奇怪 Token 混进来，可能偶尔输出离谱词。</p>
+<p>面试时说：K 是静态的，不随分布变化。一个很集中的分布（第一个词 0.9，其余 0.1），K=50 会把大量低概率 Token 纳入候选。一个很分散的分布（所有词都差不多），K=50 可能砍掉合理候选。</p>
+<h3 id="top-p-nucleus-sampling-累积概率超过p就停">Top-P (Nucleus) Sampling — 累积概率超过P就停</h3>
+<p>自适应版 Top-K。从概率最高的 Token 开始累加，累到超过 P（通常 0.9）就停，只在这个最小集合里随机抽。</p>
+<p>分布集中时，「the」概率 0.85，「a」0.08，Top-P 只需要 2 个 Token 就超过 0.9。分布分散时，20 个 Token 各有 0.04-0.06 概率，Top-P 会纳入所有 20 个。</p>
+<p>GPT 系列的默认策略就是 Top-P，P 通常 0.9-0.95。</p>
+<p>面试时说：Top-P 比 Top-K 更鲁棒，因为它随分布自动调整候选集大小。实际工程中两者常混用：先 Top-K 砍到 50，再 Top-P 过滤。</p>
+<h3 id="temperature-控制概率分布的平滑度">Temperature — 控制概率分布的平滑度</h3>
+<p>在 Softmax 之前，把 logits 除以温度 T：</p>
+<p>$$\text{softmax}(logits / T)$$</p>
+<p>T=1：原始分布，不改。T=0.5：分布更尖锐，高概率更高、低概率更低，Greedy 和 Sampling 都更确定。T=2.0：分布更平滑，各 Token 概率差距缩小，Sampling 更随机多样。</p>
+<p>T→0 逼近 Greedy。T→∞ 变成完全随机采样。标准区间：T=0.7-1.0 适合对话，T=0.2-0.5 适合代码/翻译，T&gt;1.0 适合创意写作。</p>
+<p>面试时说：Temperature 是控制「创造性 vs 确定性」的最直观旋钮。面试官问你调过什么参数来改善输出质量，Temperature 是最安全、最管用的答案。</p>
+<h3 id="一句话选型">一句话选型</h3>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>策略</th>
+<th>温度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>翻译、代码</td>
+<td>Beam Search (K=3-5)</td>
+<td>0.2-0.5</td>
+</tr>
+<tr>
+<td>对话、客服</td>
+<td>Top-P (0.9)</td>
+<td>0.7-0.8</td>
+</tr>
+<tr>
+<td>创意写作、头脑风暴</td>
+<td>Top-P (0.95) + Top-K (50)</td>
+<td>1.0-1.2</td>
+</tr>
+<tr>
+<td>数学推理</td>
+<td>Greedy + CoT</td>
+<td>0.0-0.1</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-2">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-3">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-3" class="lesson">
+  <div class="lesson-part-label">第一部分：世界观 —— 大模型到底是个什么东西</div>
   <h1>第 3 课：你怎么跟模型说话，Prompt + CoT + ICL</h1>
 <p>Prompt Engineering 的核心就一件事：把要求写具体。「写个方案」不行，「写一个针对大学生的校园奶茶店营销方案，预算 5000 元，分线上线下各三项措施」才行。</p>
 <p>记忆框架 CRISP。Context 上下文，你是谁什么场景。Role 角色，你是一个毒舌美食评论家。Instruction 指令，写 300 字分三段。Style 风格，用初中生能看懂的语言。Purpose 目的，这份材料要给投资人看的。五要素配齐，输出质量直接上一个台阶。</p>
@@ -738,7 +811,7 @@ body {
 <p>磨平一些信息差。</p>
 </blockquote>
   <nav class="lesson-nav">
-    <a href="#lesson-2">← 上一课</a>
+    <a href="#lesson-3">← 上一课</a>
     <a href="#toc" class="nav-center">↑ 目录</a>
     <a href="#lesson-4">下一课 →</a>
   </nav>
@@ -2155,6 +2228,40 @@ Observation（观察）：工具返回了什么
 
 <section id="lesson-24" class="lesson">
   <div class="lesson-part-label">第四部分：落地 —— 大模型的十八般武艺</div>
+  <h1>第 24.5 课：多模态/VLM 入门，模型怎么看图</h1>
+<p>到目前为止讲的都是文本模型。但 2025 年之后，面试里越来越多问多模态。GPT-4V、Gemini、Qwen-VL 都能看图了。怎么做到的？</p>
+<h3 id="clip图文的翻译官">CLIP：图文的翻译官</h3>
+<p>2021 年 OpenAI 发布了 CLIP，核心操作极其简单：用对比学习让图片和文字在同一个向量空间里对齐。</p>
+<p>训练数据是 4 亿对（图片，文字描述）。batch 里混着放，目标是让配对的图文向量距离最近，不配对的推远。训练完后，一张猫的图片拉成的向量，和「一只猫」这行文字拉成的向量，在 512 维空间里几乎重叠。和「一辆汽车」的向量则隔得很远。</p>
+<p>CLIP 的结构：一个视觉编码器把图片压缩成 512 维向量，一个文本编码器把文字也压缩成 512 维向量。两个向量做余弦相似度。它是目前所有 VLM 的地基。</p>
+<h3 id="vlm-怎么把图喂给-llm">VLM 怎么把图喂给 LLM</h3>
+<p>标准架构分三步。</p>
+<p>第一步，视觉编码器（通常是 CLIP 的 ViT 或 SigLIP）把一张图切成若干 patch（比如 16×16 像素的小块），每个 patch 变成一个向量。一张 224×224 的图变成 196 个 patch 向量。</p>
+<p>第二步，投影层（一个线性层或轻量 MLP）把这 196 个视觉 patch 向量投影到跟 LLM 的 Token Embedding 同一个维度。比如 LLM 的 Embedding 是 4096 维，投影层就把 ViT 输出的视觉向量全映射到 4096 维。</p>
+<p>第三步，拼到 LLM 输入里。正常的文本 Token 是 [猫，坐在，垫子上]。加上图片之后变成 [img_patch_1, img_patch_2, ..., img_patch_196, 猫，坐在，垫子上]。LLM 通过自注意力同时看到视觉信息和文本信息，自然能把「图片里那只猫」跟「猫这个字」对齐。</p>
+<p>LLaVA 就是这个架构。视觉编码器冻结不动（CLIP 已经训好了），LLM 冻结不动（已有语言能力），只训练中间那层投影层。成本极低，几小时就训完。</p>
+<h3 id="vlm-也会幻觉而且更隐蔽">VLM 也会幻觉，而且更隐蔽</h3>
+<p>纯文本幻觉：模型不知道某个事实，编了。VLM 幻觉：模型看错了图片里的东西，然后基于错误的视觉理解做推理。</p>
+<p>一张模糊的停车标志图，视觉编码器看成了限速标志。LLM 拿到的是一个「限速标志」的向量，然后一本正经地推理这张图的交通含义。从 LLM 的视角看，它没编造，它收到的视觉输入本身就是错的。</p>
+<p>这也是为什么 VLM 对光照、角度、遮挡极其敏感。视觉编码器的感受野有限，远处小物体、被遮挡物体、反光区域都是幻觉重灾区。</p>
+<h3 id="面试三问-怎么答">面试三问 + 怎么答</h3>
+<p><strong>「VLM 和纯 LLM 在架构上最大的区别是什么？」</strong> — 多了一个视觉编码器 + 投影层。LLM 本身没变。训练时只训投影层（轻量方案）或者把 LLM 也解冻（重量方案）。</p>
+<p><strong>「图文怎么对齐的？」</strong> — CLIP 的对比学习。核心 loss 让配对的图文向量互信息最大化。对齐质量直接决定 VLM 的上限。</p>
+<p><strong>「VLM 的推理成本为什么比 LLM 高？」</strong> — 图的 patch 数量远大于文本 Token。224×224 的图 = 196 个 patch = 196 个 Token 的视觉前缀。加上原始文本 Token，序列长度至少翻倍。自注意力的 O(n²) 随着 Token 翻倍，计算量翻 4 倍。</p>
+<hr />
+<blockquote>
+<p>磨平一些信息差。</p>
+</blockquote>
+  <nav class="lesson-nav">
+    <a href="#lesson-23">← 上一课</a>
+    <a href="#toc" class="nav-center">↑ 目录</a>
+    <a href="#lesson-24">下一课 →</a>
+  </nav>
+</section>
+
+
+<section id="lesson-24" class="lesson">
+  <div class="lesson-part-label">第四部分：落地 —— 大模型的十八般武艺</div>
   <h1>第 24 课：前沿架构，MoE、GQA、DeepSeek 怎么玩的</h1>
 <p>MoE（Mixture of Experts）：把密集的 FFN 拆成多个「专家」小矩阵。每个 Token 经由路由网络只激活 Top-2 专家。参数量暴增但激活量不暴增。DeepSeek-V3 总参数 1.6T，每次推理只激活 49B。负载均衡通过辅助损失保证各专家使用率均等。</p>
 <p>GQA（Grouped Query Attention）：K 和 V 分成 G 组，Q 保持全头，组内共享 KV。MHA（全头）精度最高但 KV Cache 大。MQA（K/V=1 头）最省但信息瓶颈。GQA 取折中。Llama 2、Qwen 用 GQA。</p>
@@ -2185,7 +2292,7 @@ Observation（观察）：工具返回了什么
 <p>磨平一些信息差。</p>
 </blockquote>
   <nav class="lesson-nav">
-    <a href="#lesson-23">← 上一课</a>
+    <a href="#lesson-24">← 上一课</a>
     <a href="#toc" class="nav-center">↑ 目录</a>
     <a href="#lesson-25">下一课 →</a>
   </nav>
