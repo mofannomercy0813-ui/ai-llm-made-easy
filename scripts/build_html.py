@@ -223,9 +223,11 @@ def build_toc(entries):
                 lines.append(f'<li class="toc-part">{part}</li>')
                 prev_part = part
             current_lesson = lesson_num
+            # 用 strip_title_prefix 去掉标题里自带的「第 X 课」前缀
+            clean_title = strip_title_prefix(title)
             lines.append(
                 f'<li class="toc-lesson">'
-                f'<a href="#lesson-{lesson_num}">第 {lesson_num} 课 · {title}</a>'
+                f'<a href="#lesson-{lesson_num}">第 {lesson_num} 课 · {clean_title}</a>'
                 f'</li>'
             )
         else:
@@ -780,9 +782,24 @@ body {
 """
 
 
+def strip_latex(md_text):
+    """移除 Markdown 中的 LaTeX 数学公式块（$$...$$ 和 $...$）"""
+    # 移除块级公式 $$...$$
+    md_text = re.sub(r'\$\$.*?\$\$', '', md_text, flags=re.DOTALL)
+    # 移除行内公式 $...$
+    md_text = re.sub(r'\$(.+?)\$', '', md_text)
+    return md_text
+
+
+def strip_title_prefix(title):
+    """移除标题中的 '第 X 课' 或 '第 X.Y 课' 前缀"""
+    return re.sub(r'^第\s*\d+(\.\d+)?\s*课[：:]?\s*', '', title)
+
+
 def convert_md_to_html(md_text):
     """将 Markdown 文本转换为 HTML"""
     import markdown
+    md_text = strip_latex(md_text)
     return markdown.markdown(
         md_text,
         extensions=[
