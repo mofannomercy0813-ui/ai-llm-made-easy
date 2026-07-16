@@ -2276,14 +2276,21 @@ Observation（观察）：工具返回了什么
 <section id="lesson-23" class="lesson">
   <div class="lesson-part-label">第四部分：落地 —— 大模型的十八般武艺</div>
   <h1>第 23 课：MCP / A2A / Function Call，让模型会叫外援</h1>
-<p>Function Call：模型输出 JSON 描述调什么函数传什么参。外部框架截获执行后结果喂回。极简，但一次性，没有持久化工具管理。</p>
-<p>MCP（Model Context Protocol）：Anthropic 2024 年发布。客户端-服务器架构。AI 宿主是客户端，每个工具封装成 MCP 服务器。服务器暴露统一接口，列出资源、描述参数、处理请求。一次开发，所有支持 MCP 的 AI 应用都能用。社区已有数百个现成服务器，Google Drive、GitHub、PostgreSQL。</p>
-<p>A2A（Agent-to-Agent）：Google 2024 年发布。不是模型↔工具，是 Agent↔Agent。跨组织互操作，采购 Agent 跟供应商库存 Agent 确认交货时间。定义了发现、握手、任务分配、结果回传的标准流程。</p>
-<p>Skill：预定义的 Prompt + 调用规范。MCP 是通用工具层，Skill 是场景化编排。两者互补。</p>
-<hr />
-<h3 id="mcp-连接数据库的实际过程">MCP 连接数据库的实际过程</h3>
-<p>假设 Claude 要通过 MCP 查 PostgreSQL 里的订单表。</p>
-<p><strong>1. 启动时</strong>：MCP 客户端（Claude 宿主）连接 PostgreSQL MCP 服务器。服务器暴露能力清单：</p>
+<h3 id="模型为什么需要外援">模型为什么需要外援</h3>
+<p>大模型的知识截止于训练数据，2024 年之后发生的事它不知道。它不会查数据库，不会发邮件，不会访问 Google Drive。所有能力都被锁在训练语料里。</p>
+<p>要让模型超越自己的训练数据，必须给它连接外部工具。四种方案，从简单到复杂。</p>
+<h3 id="function-call-最原始的工具调用">Function Call — 最原始的工具调用</h3>
+<p>做法很简单。提前定义工具清单（函数名、参数格式、功能描述），塞进 system prompt。用户提问后，模型决定要不要调工具。要调的话，不输出自然语言，而是输出一段描述性的结构化文本，通常就是 JSON：「调 query 这个函数，sql 参数是 SELECT SUM(amount) FROM orders...」。</p>
+<p>外部框架截获这段 JSON，执行真正的 SQL 查询，把查出来的 <code>[{"sum": 456.80}]</code> 追加到对话历史里喂回给模型。模型基于真实数据继续推理，输出最终回答。</p>
+<p>Function Call 的问题：每个 AI 应用自己定义工具格式。你用 OpenAI 的 Function Call 格式写了一组工具，换到 Claude 就得重写。没有统一标准意味着生态割裂，每个平台一个格式，工具开发者要适配 N 套接口。</p>
+<h3 id="mcp-把-function-call-标准化">MCP — 把 Function Call 标准化</h3>
+<p>Anthropic 2024 年发布了 MCP（Model Context Protocol）。核心思想：定义一套通用的客户端-服务器协议，让所有工具按同一种方式暴露给所有 AI 应用。</p>
+<p>AI 宿主（比如 Claude Desktop、CodeBuddy）是 MCP 客户端。每个工具（PostgreSQL、GitHub、Google Drive）封装成 MCP 服务器。服务器暴露统一的接口规范：列出自己能干什么、每个功能需要什么参数、执行后返回什么格式。</p>
+<p>一次开发，所有支持 MCP 的应用都能用。社区已经有数百个现成的 MCP 服务器，数据库查询、文件操作、API 调用、代码执行。开发者不需要为每个 AI 平台各写一套工具适配层。</p>
+<p>MCP 的另一个关键设计：权限和资源管理。服务器在启动时声明自己需要什么权限，用户确认后才能连接。不像 Function Call 那样无状态的每次调用，MCP 维持持久连接和资源生命周期。</p>
+<h3 id="实际走一遍mcp-查数据库">实际走一遍：MCP 查数据库</h3>
+<p>假设 Claude 要通过 MCP 查 PostgreSQL。</p>
+<p><strong>启动时</strong>：MCP 客户端连接 PostgreSQL MCP 服务器。服务器暴露能力清单：</p>
 <pre class="highlight"><code class="language-json">{
   &quot;tools&quot;: [
     {&quot;name&quot;: &quot;query&quot;, &quot;description&quot;: &quot;执行 SQL 查询&quot;, &quot;parameters&quot;: {&quot;sql&quot;: &quot;string&quot;}},
@@ -2292,19 +2299,17 @@ Observation（观察）：工具返回了什么
 }
 </code></pre>
 
-<p><strong>2. 用户提问</strong>：「查一下 user_id=1088 昨天的订单总金额」</p>
-<p><strong>3. 模型生成 Function Call</strong>：</p>
-<pre class="highlight"><code class="language-json">{
-  &quot;tool&quot;: &quot;query&quot;,
-  &quot;parameters&quot;: {
-    &quot;sql&quot;: &quot;SELECT SUM(amount) FROM orders WHERE user_id = 1088 AND date = '2026-07-14'&quot;
-  }
-}
-</code></pre>
-
-<p><strong>4. MCP 服务器执行</strong>：连接数据库，跑 SQL，返回 <code>[{"sum": 456.80}]</code></p>
-<p><strong>5. 模型回答</strong>：「用户 1088 昨天的订单总金额为 456.80 元。」</p>
-<p>整个过程，模型不需要知道数据库地址、账号密码、表结构。MCP 服务器做了封装。换一个 MySQL 服务器，只要它实现了相同的 MCP 接口，模型代码零改动。</p>
+<p><strong>用户提问</strong>：「查一下 user_id=1088 昨天的订单总金额」</p>
+<p><strong>模型生成调用</strong>：不是直接写 SQL，而是按 MCP 接口格式输出调用请求。外部框架截获后交给 MCP 服务器执行 SQL，返回 <code>[{"sum": 456.80}]</code>。模型基于真实数据回答。</p>
+<p>整个过程，模型不需要知道数据库地址、账号密码、表结构。MCP 服务器做了封装。换成一个 MySQL 服务器，只要实现了相同的 MCP 接口，模型侧零改动。</p>
+<h3 id="a2a-不是模型调工具是-agent-找-agent">A2A — 不是模型调工具，是 Agent 找 Agent</h3>
+<p>MCP 解决的是「模型 ↔ 工具」的问题。但 2024 年 Google 提出了一个不同的场景：两个 Agent 之间怎么通信？</p>
+<p>场景：采购 Agent 需要确认供应商库存，它需要联系供应商自己的库存 Agent。这两个 Agent 分别是不同公司开发、部署在不同服务器上的独立系统。它们之间没有统一的通信方式。</p>
+<p>A2A（Agent-to-Agent）就是解决这个问题的协议。它定义了 Agent 之间的标准交互流程：发现（找到对方）、握手（确认双方身份和能力）、任务分配（把子任务发给对方）、结果回传。不是模型调一个函数，而是两个自主系统之间的业务协作。</p>
+<p>A2A 和 MCP 不冲突。MCP 是「模型的手」，伸手去拿一个外部工具。A2A 是「Agent 的电话」，打电话给另一个 Agent 商量怎么协作。同一个系统里可以同时存在：Agent 通过 MCP 查数据库，通过 A2A 通知另一个 Agent 更新库存状态。</p>
+<h3 id="skill-mcp-之上的编排层">Skill — MCP 之上的编排层</h3>
+<p>MCP 暴露的是原子工具：执行 SQL、读文件、发 HTTP 请求。但实际任务很少是单一原子操作，「帮我分析上周的销售数据然后发邮件给老板」要分五步，涉及三个不同的工具。</p>
+<p>Skill 是一段预定义的 Prompt + 多步工具调用流程。它把 MCP 的原子操作编排成场景化的能力。比如「数据分析 Skill」内部调用 MCP 的 PostgreSQL 查询 + Python 执行 + 邮件发送三个工具，统一封装成一个能力入口。用户只需要描述想分析什么，Skill 自动调度底层的 MCP 工具完成多步操作。</p>
 <hr />
 <blockquote>
 <p>磨平一些信息差。</p>
