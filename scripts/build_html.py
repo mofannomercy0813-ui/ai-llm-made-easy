@@ -167,7 +167,7 @@ def build_full_html(lessons_data):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI 大模型不难 —— 周末读完的 LLM 面试通关书</title>
+<title>AI 大模型不难 —— 让你懂说黑话的AI大模型扫盲书</title>
 <style>
 {css}
 </style>
