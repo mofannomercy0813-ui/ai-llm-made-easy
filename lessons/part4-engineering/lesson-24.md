@@ -1,20 +1,14 @@
 # 第 24 课：前沿架构，MoE、GQA、DeepSeek 怎么玩的
 
-MoE（Mixture of Experts）：把密集的 FFN 拆成多个「专家」小矩阵。每个 Token 经由路由网络只激活 Top-2 专家。参数量暴增但激活量不暴增。DeepSeek-V3 总参数 1.6T，每次推理只激活 49B。负载均衡通过辅助损失保证各专家使用率均等。
+### MoE — 让模型又大又快
 
-GQA（Grouped Query Attention）：K 和 V 分成 G 组，Q 保持全头，组内共享 KV。MHA（全头）精度最高但 KV Cache 大。MQA（K/V=1 头）最省但信息瓶颈。GQA 取折中。Llama 2、Qwen 用 GQA。
+传统 Transformer 的 FFN 层是密集的，每个 Token 都要经过整个 FFN 矩阵的全部参数。7B 模型就是 7B 个参数全部激活一次。模型越大，推理越慢。
 
-DeepSeek-V3 整合了 MoE + GQA + MLA（Multi-head Latent Attention，KV 投影到极小的潜在空间，128K 长序列 KV Cache 压至传统方案 1/10）。开源模型顶尖。
+MoE（混合专家）换了一种思路：不把 FFN 做成一个大矩阵，而是做成多个「专家」小矩阵。每个 Token 到这一层时，先过一个小路由网络，选择最合适的 Top-K 个专家，只用这几个专家处理这个 Token。其他专家不动。
 
----
+DeepSeek-V3 的做法：256 个专家，每个约 6.4B 参数。每个 Token 只激活 Top-8。总参数 1.6T，但每次推理的计算量相当于一个 49B 的密集模型，参数量是 GPT-4 量级，推理成本跟 Llama-70B 差不多。
 
-### MoE 怎么做到「参数巨大但推理不贵」
-
-传统密集模型：一个 7B 模型，每个 Token 都要经过全部 7B 参数。计算量 = 7B。
-
-DeepSeek-V3：256 个专家（每个约 6.4B），每次只激活 Top-8。
-
-**一个 Token 穿过 MoE 层的计算**：
+**一个 Token 穿过 MoE 层**：
 
 ```
 Token 「猫」→ 路由网络打分 →
@@ -24,18 +18,38 @@ Token 「猫」→ 路由网络打分 →
   ...
   专家 201: 0.08（忽略）
 
-输出 = 0.83 × Expert17(Token) + 0.72 × Expert89(Token)
+最终输出 = 0.83 × Expert17(Token) + 0.72 × Expert89(Token)
 ```
 
-256 个专家，只跑了 8 个。参数量 1.6T，每次推理的计算量只相当于激活参数 49B。这就是 MoE 的精髓：大模型的容量，小模型的速度。
+路由网络的权重和主模型一起训练。没有人为指定「专家 17 负责动词、专家 89 负责名词」，这些专长是训练过程中自然分化的。
 
-**负载均衡怎么保证**：如果所有 Token 都选专家 17 和 89，其他 254 个专家白训了。辅助损失函数惩罚专家使用不均：
+**负载均衡**：如果所有 Token 都砸向专家 17 和 89，其他 254 个专家白训了，而且那两张 GPU 被挤爆，别的 GPU 闲置。MoE 必须加辅助损失函数惩罚专家使用不均：
 
-```
-L_balance = α × Σ(每个专家的平均选择概率 - 1/N_experts)²
-```
+$$L_{balance} = \alpha \times \sum(\text{每个专家被选中的平均概率} - 1/N_{experts})^2$$
 
-所有专家使用率强制均匀分布。训练几亿 Token 后，256 个专家自然分化出各自的领域。
+这保证在几十亿 Token 的训练过程中，256 个专家各自的利用率逐渐趋于均匀。
+
+### GQA — KV Cache 的信息瓶颈
+
+第 21 课讲了 KV Cache 占显存的问题。Cache 的大小跟注意力头的数量成正比，头越多，Cache 越大。
+
+标准多头注意力 MHA：Q、K、V 都是完整的 H 个头。比如 H=32，每层存 32 个 K 向量和 32 个 V 向量，显存开销大。但精度高，每个头有独立的 K、V 表达。
+
+MQA（Multi-Query Attention）：K 和 V 砍到只剩 1 个头，所有 Q 头共享。KV Cache 直接砍到 1/H。省显存省得狠，但信息瓶颈明显，32 个 Q 头只能查同一组 K、V，表达能力受限。
+
+GQA（Grouped Query Attention）取折中：K 和 V 分 G 组（比如 G=8），每组内的 Q 头共享 K、V。Q 保持 32 头全量，但 KV 只有 8 组。KV Cache 是 MHA 的 1/4，表达能力比 MQA 好得多。Llama 2、Qwen 都用的 GQA。
+
+### MLA — DeepSeek 的超长文本秘籍
+
+MLA（Multi-head Latent Attention）是 DeepSeek 对 GQA 的进一步改进。核心操作：K 和 V 不直接存在注意力头维度，而是先投影到一个极小的潜在空间（比如 64 维），推理时再从潜在空间恢复到完整的头维度。
+
+这样做的好处：KV Cache 不再随头数增长，而是固定在潜在空间的大小。H=128 的标准多头注意力，KV Cache 要存 128 组向量。MLA 只需要存 1 组低维潜在向量，Cache 大小只有传统方案的几分之一甚至十几分之一。
+
+这就是 DeepSeek-V3 能支持 128K 长上下文的根本原因。如果按传统的 KV Cache 方案，128K 序列的 Cache 要几十 GB，一张 GPU 根本放不下。MLA 把 128K 的 Cache 压到了传统方案 8K-16K 的水平。
+
+### 三件套如何组合
+
+DeepSeek-V3 的架构 = MoE（256 专家，每次激活 8 个） + GQA（KV 分组共享） + MLA（KV 潜在空间压缩）。MoE 降低推理计算量，GQA 降低 KV Cache 的显存占用，MLA 进一步把长序列的 Cache 压缩到极致。三件套协同，才能让一个 1.6T 参数的模型在适中的 GPU 集群上跑 128K 上下文。
 
 ---
 
