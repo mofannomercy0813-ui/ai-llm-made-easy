@@ -1,6 +1,6 @@
 # 《AI 大模型不难》
 
-> 周末读完的 LLM 面试通关书。不讲代码，只讲你能在面试里说清楚的原理。28 课，每课一个生活比喻 + 一个手算示例。
+> 扫盲书，看完你就会懂怎么说黑话。28 课 + 2 附录，不讲代码，只把原理拆到你能在面试里讲清楚。
 
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -10,9 +10,9 @@
 
 大模型面试八股背到第三天就崩溃了。不是因为记不住。是因为面试官每个词都能追着问——LoRA 原理？跟 QLoRA 的区别？为什么不直接用 Adapter？
 
-市面上的资源有三种：付费课程太贵且不知道值不值，开源教程太代码太重需要 PyTorch 基础，面试题库给你标准答案但不讲「为什么是这个答案」。
+市面上的资源有三种：付费课程太贵且不知道值不值，开源教程代码太重需要 PyTorch 基础，面试题库给你标准答案但不讲「为什么是这个答案」。
 
-这本书想做一件事：**每课一个生活比喻让你瞬间建立直觉，再用手算示例让你真的理解机制。** 不用 GPU，不用 Jupyter，一部手机就能读完。
+这本书做一件事：**每个概念从零开始讲，讲到你能用自己的话在面试里说清楚为止。** 不用 GPU，不用 Jupyter，一部手机就能读完。
 
 ---
 
@@ -34,68 +34,48 @@
 1. Token、预训练、微调
 2. 涌现和幻觉
 3. Prompt + CoT + ICL
-4. 解码策略，模型怎么从概率里挑词
+4. 解码策略
 5. RLHF 五分钟速览
 6. 量化、蒸馏、分布式
 
 ### 第二部分：引擎
 
 7. Transformer 到底是什么
-8. Attention 公式，手写一遍就懂了
-9. 多头注意力，为什么一个头不够
-10. 位置编码，模型怎么知道词顺序
-11. 残差连接，梯度的高速公路
-12. LayerNorm，BN 在图像界称王，NLP 为什么不行
+8. Attention 公式
+9. 多头注意力
+10. 位置编码（RoPE）
+11. 残差连接
+12. LayerNorm / RMSNorm
 13. Pre-norm vs Post-norm
-14. 两种 Mask，为什么模型必须戴眼镜
+14. Padding Mask + Sequence Mask
 
 ### 第三部分：炼金
 
-15. 参数 vs 数据 + Scaling Law
-16. MLM vs CLM，两种教法
-17. RLHF 全流程，SFT → RM → PPO
+15. 参数 vs 数据 + Chinchilla
+16. MLM vs CLM
+17. RLHF 全流程
 18. DPO 和 GRPO
-19. LoRA，穷玩大模型的答案
-20. 训练硬核，过拟合/梯度/ZeRO
+19. LoRA / QLoRA
+20. 过拟合、梯度、Warmup、ZeRO
 
 ### 第四部分：落地
 
-21. RAG，让模型会查资料
+21. RAG 全链路
 22. 推理优化全家桶
-23. AI Agent，让模型会干活
+23. AI Agent + ReAct
 24. MCP / A2A / Function Call
-25. 前沿架构，MoE、GQA、DeepSeek
+25. MoE、GQA、MLA
 26. 多模态/VLM 入门
 
 ### 第五部分：实战
 
-27. 大厂真题精讲（上）+ 模拟面试
+27. 大厂真题精讲（上）
 28. 大厂真题精讲（下）+ 系统设计 + 项目讲述
 
 ### 附录
 
-- **A**：NLP 基础速查（Embedding、损失函数、激活函数、超参）
-- **B**：理论速查表（显存公式、默认值、开源模型对比、面试常用数字）
-
----
-
-## 阅读方式
-
-零基础从头读。面试突击跳到第 27 课刷真题，遇到卡壳的概念再往回翻。有基础跳到任何一课当词典查。
-
-每课独立，不需要前情提要。平均 800 字，5-8 分钟读完一课。全书约 2.5 万字，一个周末可以通读。
-
----
-
-## 本地阅读
-
-```bash
-pip install markdown
-python scripts/build_html.py
-# 打开 index.html
-```
-
-或直接打开仓库里的 `index.html`（已预构建）。
+- **A**：NLP 基础速查
+- **B**：理论速查表（公式、显存、默认值、模型对比）
 
 ---
 
@@ -103,16 +83,28 @@ python scripts/build_html.py
 
 | | 本书 | 图解大模型 | Happy-LLM | LLMs-from-scratch |
 |---|---|---|---|---|
-| 形式 | 比喻+手算 | 300幅全彩插图 | PyTorch 代码实现 | Jupyter 从零写 GPT |
+| 形式 | 原理精讲 + 手算走通 + 面试演练 | 300 幅全彩插图 | PyTorch 代码实现 | 从零写 GPT |
 | 时长 | 周末读完 | 需系统学习 | 需编程基础 | 需编程+数学 |
-| 适合 | 面试准备+快速入门 | 深入理解+实操 | 代码实战 | 底层原理研究 |
+| 适合 | 面试准备 + 零基础扫盲 | 深入理解 + 实操 | 代码实战 | 底层原理 |
 | 价格 | 免费开源 | ¥159.80 | 免费 | 免费 |
+
+---
+
+## 本地阅读
+
+```bash
+pip install markdown
+python scripts/build_html.py         # 生成 HTML
+python scripts/build_html.py --pdf   # 生成 HTML + PDF
+```
+
+或直接打开仓库里的 `index.html` 或下载 `ai-llm-made-easy.pdf`。
 
 ---
 
 ## 反馈
 
-发现错误、有更好的比喻、或者用这本书面过了面试——提 Issue 或 PR。
+发现错误、有更好的讲法、或者用这本书面过了面试——提 Issue 或 PR。
 
 ---
 
