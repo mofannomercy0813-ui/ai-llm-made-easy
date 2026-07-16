@@ -178,8 +178,8 @@ def build_full_html(lessons_data):
 
 <header class="book-header">
   <h1 class="book-title">AI 大模型不难</h1>
-  <p class="book-subtitle">一本让零基础读者也能笑着看懂 Transformer 的开源电子书</p>
-  <p class="book-meta">共 {total_lessons} 课 · 五大部分 · 从零到面试通关</p>
+  <p class="book-subtitle">让你懂说黑话的AI大模型扫盲书</p>
+  <p class="book-meta">{total_lessons} 课 · 2 附录 · 不讲代码只讲原理</p>
 </header>
 
 {toc_html}
