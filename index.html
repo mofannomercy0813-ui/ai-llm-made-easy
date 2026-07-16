@@ -544,7 +544,7 @@ body {
 <li class="toc-lesson"><a href="#lesson-9">第 9 课 · 位置编码，模型怎么知道词顺序</a></li>
 <li class="toc-lesson"><a href="#lesson-10">第 10 课 · 残差连接，梯度的高速公路</a></li>
 <li class="toc-lesson"><a href="#lesson-11">第 11 课 · LayerNorm，为什么每个 Transformer 层里都塞了一个它</a></li>
-<li class="toc-lesson"><a href="#lesson-12">第 12 课 · Pre-norm vs Post-norm，安检放哪的问题</a></li>
+<li class="toc-lesson"><a href="#lesson-12">第 12 课 · Pre-norm vs Post-norm</a></li>
 <li class="toc-lesson"><a href="#lesson-13">第 13 课 · 两种 Mask，为什么模型必须戴眼镜</a></li>
 <li class="toc-part">第三部分：炼金 —— 模型是怎么训出来的</li>
 <li class="toc-lesson"><a href="#lesson-14">第 14 课 · 参数 vs 数据，容器和内容</a></li>
@@ -1471,36 +1471,28 @@ Output_学习 = 0.33×[2,0] + 0.67×[0,2] = [0.66, 1.34]
 
 <section id="lesson-12" class="lesson">
   <div class="lesson-part-label">第二部分：引擎 —— Transformer 里里外外</div>
-  <h1>第 12 课：Pre-norm vs Post-norm，安检放哪的问题</h1>
-<p>两个公式。</p>
-<p>Post-norm（原论文）：y = LayerNorm(x + F(x))
-Pre-norm（现代）：y = x + F(LayerNorm(x))</p>
-<p>区别：LayerNorm 放在加号前还是加号后。</p>
-<p>Post-norm 把残差和子层输出加起来再过 LayerNorm。梯度回传要经过除法，训练初期网络不稳，标准差上蹿下跳，梯度跟着波动。需要 Warmup：前几千步极小学习率等网络稳定。</p>
-<p>Pre-norm 把 LayerNorm 挪到 F(x) 前面。残差的平滑通道直接绕过整个 F(LayerNorm(x)) 块，梯度走这条不经过任何运算。dy/dx = I + dF(LN(x))/dx，I 保底。不需要 Warmup，从第一步就能用正常学习率。</p>
-<hr />
-<h3 id="梯度回传路径对比">梯度回传路径对比</h3>
-<p>以一个 Attention 子层为例，输入 x = [0.5, -0.3, 0.8]。</p>
-<p><strong>Post-norm 路径</strong>：</p>
-<pre class="highlight"><code>x ──→ Attention ──→ + ──→ LayerNorm ──→ y
- ↑                              │
- └────── 残差 ──────────────────┘
-                                ↓
-                              梯度要过 LayerNorm
-                              ÷σ 压缩 / ×σ 放大
-</code></pre>
+  <h1>第 12 课：Pre-norm vs Post-norm</h1>
+<h3 id="这个问题怎么来的">这个问题怎么来的</h3>
+<p>第 10 课讲了残差连接，每层输出 = x + F(x)，给梯度一条直通高速路。第 11 课讲了 LayerNorm，把数值拉到标准分布，防止爆炸和消失。</p>
+<p>Transformer 的每一层里，这两个东西都要用到。于是一个很自然的问题出现了：<strong>残差连接里的加号和 LayerNorm，谁先谁后？</strong></p>
+<p>这个问题看起来微不足道。一个加号放在归一化前面还是后面，能有多大事？但在 2017 年原论文和之后所有的现代模型之间，恰好就是这个顺序不一样。而且原论文选错了。</p>
+<h3 id="原论文的做法post-norm先加再归一化">原论文的做法（Post-norm）：先加，再归一化</h3>
+<p class="math-display">y = LayerNorm(x + F(x))</p>
 
-<p>梯度从 y 回传到 x，必须穿过 LayerNorm 的除法运算。如果训练初期 σ=0.1，梯度被放大 10 倍，参数飞出去。如果 σ=10.0，梯度被压缩到 0.1 倍，参数原地踏步。这就是需要 Warmup 的根源。</p>
-<p><strong>Pre-norm 路径</strong>：</p>
-<pre class="highlight"><code>x ──→ LayerNorm ──→ Attention ──→ + ──→ y
- ↑                                  │
- └───────── 残差直通 ───────────────┘
-                                    梯度从这里回传
-                                    直接走残差线，不经运算
-</code></pre>
+<p>数据流是这样的：残差连接先把 x 和 F(x) 加起来，然后整体送进 LayerNorm 做归一化。</p>
+<p>问题出在梯度回传上。第 10 课说过，残差连接之所以能防梯度消失，是因为梯度有一条<strong>不经过任何运算的直通道</strong>。但 Post-norm 把这个直通道给堵了，x 的梯度必须先通过加号，再穿过 LayerNorm 才能回到 x。LayerNorm 里有除法（除以标准差 σ），这就把直通道变成了弯通道。</p>
+<p>训练初期，网络各层的输出还不稳定，标准差 σ 忽大忽小。σ 小的时候（比如 0.1），梯度通过 LayerNorm 时被放大 10 倍，参数一步跨出去老远，训练炸了。σ 大的时候（比如 10.0），梯度被压缩到 0.1 倍，参数几乎不动，学不了任何东西。</p>
+<p>这就是为什么原论文需要 Warmup：训练前几千步必须用极小的学习率，等各层的 σ 稳定在一个合理范围了，再慢慢把学习率加回正常值。Warmup 的步数设错了训练就崩，是一个非常脆弱的工程补丁。</p>
+<h3 id="现代做法pre-norm先归一化再加">现代做法（Pre-norm）：先归一化，再加</h3>
+<p class="math-display">y = x + F(LayerNorm(x))</p>
 
-<p>梯度从 y 回传时，残差线是纯直通。即使 Attention 输出归一化后的 σ 剧烈波动，残差线始终给出 ∂y/∂x = I 的保底梯度。第一步就能正常训。</p>
-<p>所有现代模型全用 Pre-norm。代价是对表达能力的微弱损失远小于工程稳定性的收益。Post-norm 已被历史淘汰。</p>
+<p>LayerNorm 被挪到了 F(x) 的<strong>前面</strong>。这意味着残差连接绕过了 F(x)，也绕过了 LayerNorm。</p>
+<p>梯度回传时，从 y 回到 x 有两条路。一条穿过 F(LayerNorm(x)) 的路径可能有衰减。但另一条是残差的<strong>纯直通线</strong>，x 的梯度从终点直接跳回起点，不经过任何运算。数学上 ∂y/∂x = I + ∂F(LN(x))/∂x，前面的 I 就是这条直通线给的保底。</p>
+<p>训练从一开始就是稳定的。不需要 Warmup。第一步就能用正常学习率。</p>
+<h3 id="代价和选择">代价和选择</h3>
+<p>Pre-norm 有一个微小的代价：LayerNorm 在 F(x) 之前做归一化，等于每一层的输入总是被削平的。这在理论上可能轻微削弱深层网络的表达能力，因为归一化抹掉了一些幅值信息。</p>
+<p>但 100 层 Transformer 训不训得动，远比这点理论上的表达损失重要。所有现代模型，GPT、Llama、DeepSeek、Qwen，全部用的 Pre-norm。</p>
+<p>Post-norm 已经被工程实践淘汰了。不是因为理论上 Pre-norm 效果更好，而是因为 Pre-norm <strong>不需要那个脆弱得令人发指的 Warmup</strong>。</p>
 <hr />
 <blockquote>
 <p>磨平一些信息差。</p>
